@@ -50,10 +50,13 @@ $(O_ISR_KERNEL): %.o: %.c
 
 
 clean:
-	rm kernel/PM/kernel-PM.bin
-	rm kernel/kernel.o
-	rm kernel/lib/code/*.o
-	rm kernel/lib/code/cpu/*.o
+	rm -f kernel/PM/kernel-PM.bin
+	rm -f kernel/kernel.bin
+	rm -f kernel/kernel.elf
+	rm -f log.txt
+	rm -f tmp.img
+	rm -f $(shell find ./kernel/ -type f -name "*.o")
+	clear
 
 run:
 	rm ./log.txt
