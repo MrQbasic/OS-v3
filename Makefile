@@ -59,7 +59,7 @@ clean:
 	clear
 
 run:
-	rm ./log.txt
+	rm -f ./log.txt
 	clear
 	qemu-system-x86_64 \
     -drive id=disk,file=OS.img,if=none,index=0,media=disk,format=raw \
