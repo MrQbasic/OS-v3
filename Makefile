@@ -58,7 +58,7 @@ clean:
 	rm -f $(shell find ./kernel/ -type f -name "*.o")
 	clear
 
-run:
+run: OS.img
 	rm -f ./log.txt
 	clear
 	qemu-system-x86_64 \

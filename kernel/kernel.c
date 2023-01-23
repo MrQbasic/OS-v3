@@ -113,6 +113,7 @@ void main(){
     mem_init(&endofkernel, 0x10000, MAXLINADDR);
     uint64_t asdf;
     asdf = mem_alloc(0x1000, 0x1000);  screenNl();screenPrintX64(asdf);
+    while(1);
     asdf = mem_alloc(0x0001, 0x0000);  screenNl();screenPrintX64(asdf);
     int a = mem_free(asdf);
     asdf = mem_alloc(0xFFFF000, 0x0000);  screenNl();screenPrintX64(asdf);

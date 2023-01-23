@@ -36,10 +36,9 @@ char errormsg[] = "OUT OF MEMORY! KERNEL HALT! /e";
 void mem_alloc_check_page(uint64_t start, uint64_t end){
     for(uint64_t page=(start & 0xFFFFFFFFFFFFF000); page<end; page+=0x1000){
         int error = page_trace_PML4(page, &paddr);
-        screenNl();screenPrintX64(paddr);screenSpace();screenPrintX64(page);screenSpace();screenPrintX16(error);
         if(error != 0){
             error = mem_palloc(&paddr, 1);
-            screenPrintX64(paddr); screenNl();
+            screenNl();screenPrintX64(paddr);
             if(error == 0){
                 page_map_PML4(page, paddr, 0x1, 0);
             }else{

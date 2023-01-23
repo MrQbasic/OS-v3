@@ -107,27 +107,27 @@ void page_map_PML5(uint64_t vaddr, uint64_t paddr, uint8_t flags, uint8_t prot){
 }
 
 
-//retuen 0->OK  1->PD  2->PDPT  3->PML4
+//retuen 0->OK 1->PT 2->PD 3->PDPT 4->PML4
 int page_trace_PML4(uint64_t vaddr, uint64_t* paddr){
     //limit addr args
     vaddr = vaddr & page_map_filter;
     //PML4
     uint64_t* PML4_E = pagemap_start + ((vaddr & page_map_filter_pml4) >> page_map_shift_pml4);
-    if(!(*PML4_E & 1)){return 3;}
+    if((*PML4_E & 1) != 1) return 4;
     //PDPT
     uint64_t* PDPT_B = (uint64_t*) (*PML4_E & page_map_filter);
     uint64_t* PDPT_E = PDPT_B + ((vaddr & page_map_filter_pdpt) >> page_map_shift_pdpt);
-    if(!(*PDPT_E & 1)){return 2;}
+    if((*PDPT_E & 1) != 1) return 3;
     //PD
     uint64_t* PD_B = (uint64_t*) (*PDPT_E & page_map_filter);
     uint64_t* PD_E = PD_B + ((vaddr & page_map_filter_pd) >> page_map_shift_pd);
-    if(!(*PD_E & 1)){return 1;}
+    if((*PD_E & 1) != 1) return 2;
     //PT
     uint64_t* PT_B = (uint64_t*) (*PD_E & page_map_filter);
     uint64_t* PT_E = PT_B + ((vaddr & page_map_filter_pt) >> page_map_shift_pt);
+    if((*PT_E & 1) != 1) return 1;
     //write and ret
     *paddr = ((*PT_E) & page_map_filter);
-    screenNl();screenNl(); screenPrintX64((uint64_t)PT_E);screenSpace();screenPrintX64(*PT_E);
     return 0;
 }
 
