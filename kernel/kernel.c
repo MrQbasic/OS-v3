@@ -7,6 +7,7 @@ void _start(){
 #include "lib/include/screen.h"
 #include "lib/include/cpu/cpu.h"
 #include "lib/include/mem/mem.h"
+#include "lib/include/pci/pci.h"
 
 char kernelStartMsg[] = "---Kernel---/n/e";
 char kernelPicMsg[]   = "Setup PICs/e";
@@ -118,6 +119,12 @@ void main(){
     screenPrintChars(endMsg);screenPrintX64(endofkernel);screenNl();
 
     
+    
+    uint16_t test1 = pciConfigReadWord(0x00, 0x00, 0x00, 0x00);
+    uint16_t test2 = pciConfigReadWord(0x00, 0x00, 0x00, 0x02);
+    screenNl();
+    screenPrintX16(test1); screenSpace();
+    screenPrintX16(test2);
     
     while(1);
 }
