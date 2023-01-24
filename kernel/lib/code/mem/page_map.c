@@ -1,5 +1,5 @@
-#include "../../include/mem/page_map.h"
-#include "../../include/screen.h"
+#include "mem/page_map.h"
+#include "screen.h"
 
 uint64_t *pagemap_start;
 uint8_t page_maxphyaddr;

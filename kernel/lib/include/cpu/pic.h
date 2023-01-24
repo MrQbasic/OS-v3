@@ -1,4 +1,4 @@
-#include "../def.h"
+#include "def.h"
 
 #define PIC_1_CMD  0x20
 #define PIC_1_DATA 0x21

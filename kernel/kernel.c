@@ -4,10 +4,10 @@ void _start(){
     while(1);
 }
 
-#include "lib/include/screen.h"
-#include "lib/include/cpu/cpu.h"
-#include "lib/include/mem/mem.h"
-#include "lib/include/pci/pci.h"
+#include "screen.h"
+#include "cpu/cpu.h"
+#include "mem/mem.h"
+#include "pci/pci.h"
 
 char kernelStartMsg[] = "---Kernel---/n/e";
 char kernelPicMsg[]   = "Setup PICs/e";

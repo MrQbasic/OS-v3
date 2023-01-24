@@ -1,4 +1,4 @@
-#include "../include/screen.h"
+#include "screen.h"
 
 int cur_X = 0;
 int cur_Y = 0;

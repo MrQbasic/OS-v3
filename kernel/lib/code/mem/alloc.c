@@ -1,7 +1,7 @@
-#include "../../include/mem/alloc.h"
-#include "../../include/mem/page_map.h"
-#include "../../include/mem/palloc.h"
-#include "../../include/screen.h"
+#include "mem/alloc.h"
+#include "mem/page_map.h"
+#include "mem/palloc.h"
+#include "screen.h"
 
 struct MEM_ALLOC_TAIL *mem_listStart;
 

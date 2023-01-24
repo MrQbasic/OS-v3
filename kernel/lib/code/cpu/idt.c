@@ -1,5 +1,5 @@
-#include "../../include/cpu/idt.h"
-#include "../../include/screen.h"
+#include "cpu/idt.h"
+#include "screen.h"
 
 struct IDT_ID64 IDT[256];
 

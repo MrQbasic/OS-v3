@@ -1,5 +1,5 @@
-#include "../../include/cpu/exception.h"
-#include "../../include/screen.h"
+#include "cpu/exception.h"
+#include "screen.h"
 
 char divByZero[]  = "EXCEPTION: DIVIDE BY ZERO/e";
 char debug[]      = "EXCEPTION: DEBUG/e";

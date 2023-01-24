@@ -19,6 +19,10 @@ O_S_KERNEL   := $(patsubst kernel/%.s,kernel/%.o,$(S_KERNEL))
 
 H_KERNEL     := $(shell find kernel/lib/include/ -name '*.h')
 
+LIB_DIR		 := kernel/lib/include
+
+GCC			 := gcc
+GCC_FLAGS    := -I $(LIB_DIR)
 
 
 #put everyting together
@@ -40,13 +44,13 @@ $(BIN_KERNEL): $(O_C_KERNEL) $(O_S_KERNEL) $(O_ISR_KERNEL)
 	objcopy -O binary -j .text -j .data -j .bss kernel/kernel.elf $@
 
 $(O_C_KERNEL): %.o: %.c
-	gcc -c $^ -o $@
+	$(GCC) $(GCC_FLAGS) -c $^ -o $@
 	
 $(O_S_KERNEL): %.o: %.s
 	nasm $^ -f elf64 -o $@ 
 
 $(O_ISR_KERNEL): %.o: %.c
-	gcc -mgeneral-regs-only -c $^ -o $@
+	$(GCC) $(GCC_FLAGS) -mgeneral-regs-only -c $^ -o $@
 
 
 clean:
@@ -55,6 +59,7 @@ clean:
 	rm -f kernel/kernel.elf
 	rm -f log.txt
 	rm -f tmp.img
+	rm -f OS.img
 	rm -f $(shell find ./kernel/ -type f -name "*.o")
 	clear
 

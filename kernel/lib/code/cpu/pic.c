@@ -1,6 +1,6 @@
-#include "../../include/cpu/pic.h"
-#include "../../include/cpu/port.h"
-#include "../../include/def.h"
+#include "cpu/pic.h"
+#include "cpu/port.h"
+#include "def.h"
 
 void pic_remap(uint8_t pic1, uint8_t pic2){
     //save marks

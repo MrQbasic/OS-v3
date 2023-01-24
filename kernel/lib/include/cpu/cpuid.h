@@ -1,4 +1,4 @@
-#include "../def.h"
+#include "def.h"
 
 char* cpuid_getVendor();
 

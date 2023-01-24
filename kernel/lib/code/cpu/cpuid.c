@@ -1,5 +1,5 @@
-#include "../../include/cpu/cpuid.h"
-#include "../../include/screen.h"
+#include "cpu/cpuid.h"
+#include "screen.h"
 
 char cpuid_vendorString[] = "                /e";
 

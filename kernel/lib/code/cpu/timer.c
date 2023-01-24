@@ -1,7 +1,7 @@
-#include "../../include/cpu/idt.h"
-#include "../../include/cpu/pic.h"
-#include "../../include/cpu/timer.h"
-#include "../../include/screen.h"
+#include "cpu/idt.h"
+#include "cpu/pic.h"
+#include "cpu/timer.h"
+#include "screen.h"
 
 uint64_t syscounter_get(){
     extern uint64_t syscounter_cnt;

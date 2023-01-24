@@ -1,5 +1,5 @@
-#include "../../include/mem/palloc.h"
-#include "../../include/screen.h"
+#include "mem/palloc.h"
+#include "screen.h"
 
 struct MEMORYMAP_ENTRY* memorymap = (struct MEMORYMAP_ENTRY*) MEMORYMAP_START_PTR;
 uint16_t* memorymap_count = (uint16_t*) MEMORYMAP_COUNT_PTR;

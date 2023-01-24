@@ -1,4 +1,4 @@
-#include "../def.h"
+#include "def.h"
 
 struct IDT_ID64 {
    uint16_t offset_1;
