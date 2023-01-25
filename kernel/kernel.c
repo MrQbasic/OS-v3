@@ -26,8 +26,6 @@ uint64_t startofkernel;
 void main(){
     //setup screen
     screenClear();
-    while(1);
-    
     screenPrintChars(kernelStartMsg);
 
     //setup pic (remap IRQs)

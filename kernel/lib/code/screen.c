@@ -14,14 +14,12 @@ void screenUp(){
 }
 
 void screenNl(){
-    __asm__ __volatile__("cli");
     cur_X = 0;
     cur_Y++;
     if(cur_Y > SCREEN_HIGHT){
         cur_Y--;
         screenUp();
     }
-    __asm__ __volatile__("sti");
 }
 
 void screenSpace(){
