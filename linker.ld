@@ -1,6 +1,6 @@
 SECTIONS
 {
-    . = 0x3000;
+    . = 0xEF00000;
     .text : { *(.text) }
     .data : { *(.data) }
     .bss : { *(.bss) }

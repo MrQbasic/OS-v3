@@ -65,7 +65,7 @@ start:
     cpuid
     test edx, (1 << 29)
     jz reboot
-    ;setup PLM4 table
+    ;setup PML4 table
     mov edi, PML4_BASE
     mov cr3, edi
     xor eax, eax
@@ -77,6 +77,7 @@ start:
     mov dword [edi], 0x72003
     add edi, 0x1000
     mov dword [edi], 0x73003
+    ;setup PT
     add edi, 0x1000
     mov ebx, 0x00000003
     mov ecx, 512
@@ -185,6 +186,49 @@ align 0x1000
 MEMORYMAP_CNT: dw 0
 MEMORYMAP_START: db 0
 align 0x1000
-;KERNEL
+;KERNEL enter
 [bits 64]
-kernel64:                         
+kernel64:
+;REMAP KERNEL TO TARGET POSITION
+;;set PML4 entry
+
+;;xor rdi, rdi
+;;mov rdi, PML4_BASE
+;mov QWORD [rdi + KERNEL_START_PML4], (MAP_PDPT_ADDR | 0x03)
+;;set PDPT entry
+;;mov rdi, MAP_PDPT_ADDR
+;;mov QWORD [rdi + KERNEL_START_PDPT], (MAP_PD_ADDR | 0x03)
+;;set PD entry
+mov rdi, 0x72000
+mov QWORD [rdi + KERNEL_START_PD], (MAP_PT_ADDR | 0x03)
+;;load page table
+mov rcx, 512
+mov rax, kernel_load
+mov rbx, MAP_PT_ADDR
+;
+.loop1:
+    mov      [rbx], rax
+    mov BYTE [rbx], 0x03
+    ;-
+    add rax, 0x1000
+    add rbx, 8
+    ;
+    loop .loop1
+jmp KERNEL_START
+;loading address of kernel
+align 0x1000
+kernel_load:
+
+
+
+
+;hast to be pt aligned so 0xE000000 aligned
+KERNEL_START      equ 0xFE00000
+
+KERNEL_START_PML4 equ ((KERNEL_START & 0x0000FF8000000000) >> (47)) * 8 
+KERNEL_START_PDPT equ ((KERNEL_START & 0x0000007FC0000000) >> (38)) * 8
+KERNEL_START_PD   equ ((KERNEL_START & 0x000000003FE00000) >> (21)) * 8
+
+MAP_PDPT_ADDR equ 0x74000
+MAP_PD_ADDR   equ 0x75000
+MAP_PT_ADDR   equ 0x76000

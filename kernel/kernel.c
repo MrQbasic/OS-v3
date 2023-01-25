@@ -21,12 +21,15 @@ char kernelOkMsg[]    = " OK/n/e";
 uint8_t MAXPHYADDR, MAXLINADDR;
 
 uint64_t endofkernel;
+uint64_t startofkernel;
 
 void main(){
     //setup screen
     screenClear();
-    screenPrintChars(kernelStartMsg);
+    while(1);
     
+    screenPrintChars(kernelStartMsg);
+
     //setup pic (remap IRQs)
     uint8_t pic_0_base = 0x20;
     uint8_t pic_1_base = 0x28;
@@ -70,7 +73,7 @@ void main(){
     screenPrintChars(kernelOkMsg);
 
     //enable irqs    
-    __asm__("sti");
+    //__asm__("sti");
 
     //print CPU info
     char *vendorstr = cpuid_getVendor(); 
@@ -121,7 +124,7 @@ void main(){
     
     
     uint16_t test1 = pciConfigReadWord(0x00, 0x00, 0x00, 0x00);
-    uint16_t test2 = pciConfigReadWord(0x00, 0x00, 0x00, 0x02);
+    uint16_t test2 = pciConfigReadWord(0x00, 0x00, 0x00, 0x04);
     screenNl();
     screenPrintX16(test1); screenSpace();
     screenPrintX16(test2);
