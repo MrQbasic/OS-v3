@@ -99,6 +99,7 @@ void main(){
     //get end of kernel
     extern uint64_t endptr;
     endofkernel = (uint64_t) &endptr;
+    startofkernel = (uint64_t) &_start;
 
     //setup page allocator
     screenPrintChars(kernelPMemMsg);
@@ -115,17 +116,15 @@ void main(){
     mem_init(&endofkernel, 0x10000, MAXLINADDR);
     screenPrintChars(kernelOkMsg);
 
-    //print new end of kernel
-    char endMsg[] = "Kernel end: /e";
+    //print new end + start of kernel
+    char startMsg[] = "Kernel start : /e";
+    screenPrintChars(startMsg);screenPrintX64(startofkernel);screenNl();
+    char endMsg[]   = "Kernel end   : /e";
     screenPrintChars(endMsg);screenPrintX64(endofkernel);screenNl();
-
     
+    pciCheckBus();
     
-    uint16_t test1 = pciConfigReadWord(0x00, 0x00, 0x00, 0x00);
-    uint16_t test2 = pciConfigReadWord(0x00, 0x00, 0x00, 0x04);
-    screenNl();
-    screenPrintX16(test1); screenSpace();
-    screenPrintX16(test2);
-    
+    //end of kernel
+    screenPrintChars(kernelOkMsg);
     while(1);
 }

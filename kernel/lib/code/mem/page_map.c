@@ -1,10 +1,21 @@
 #include "mem/page_map.h"
 #include "screen.h"
+#include "mem/alloc.h"
 
 uint64_t *pagemap_start;
 uint8_t page_maxphyaddr;
 uint8_t page_maxlinaddr;
 uint64_t page_map_filter;
+
+uint64_t page_pml5_backup_s[1024] __attribute__((aligned(0x1000)));
+uint64_t page_pml4_backup_s[1024] __attribute__((aligned(0x1000)));
+uint64_t page_pdpt_backup_s[1024] __attribute__((aligned(0x1000)));
+uint64_t page_pd_backup_s[1024] __attribute__((aligned(0x1000)));
+
+uint64_t* page_pml5_backup;
+uint64_t* page_pml4_backup;
+uint64_t* page_pdpt_backup;
+uint64_t* page_pd_backup;
 
 void page_map_init(uint64_t maxphyaddr, uint64_t maxlinaddr){
     uint64_t reg;
@@ -23,8 +34,11 @@ void page_map_init(uint64_t maxphyaddr, uint64_t maxlinaddr){
     __asm__ __volatile__ ("mov %%cr3, %%rax":
                           "=a"(reg):);
     pagemap_start = (uint64_t*) (reg & page_map_filter);
-    //set backup ptrs for pageing
-
+    //setup backup pointers
+    page_pml5_backup = &(page_pml5_backup_s[0]);
+    page_pml4_backup = &(page_pml4_backup_s[0]);
+    page_pdpt_backup = &(page_pdpt_backup_s[0]);
+    page_pd_backup = &(page_pd_backup_s[0]);
 }
 
 
@@ -58,11 +72,6 @@ void page_construct_PT_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t 
 #define page_map_shift_pd   29-12
 #define page_map_shift_pt   20-12
 
-uint64_t page_pml5_backup;
-uint64_t page_pml4_backup;
-uint64_t page_pdpt_backup;
-uint64_t pag_pd_backup;
-
 void page_map_PML4(uint64_t vaddr, uint64_t paddr, uint8_t flags, uint8_t prot){
     //limit addr args
     vaddr = vaddr & page_map_filter;
@@ -70,20 +79,30 @@ void page_map_PML4(uint64_t vaddr, uint64_t paddr, uint8_t flags, uint8_t prot){
     //-
     uint64_t* PML4_E  = pagemap_start + ((vaddr & page_map_filter_pml4) >> page_map_shift_pml4);
     if(!(*PML4_E & 1)){
-        screenPrintX64(0);
+        /*
+        page_construct_PML4_E(PML4_E, flags, (uint64_t)page_pml4_backup, prot);
+        page_pml4_backup = (uint64_t*) mem_alloc(0x1000, 0x1000);
+        */
+        screenClear();
+        screenPrintX64(1);
         while(1);
     }
     uint64_t* PDPT_B = (uint64_t*) (*PML4_E & page_map_filter);
     uint64_t* PDPT_E = PDPT_B + ((vaddr & page_map_filter_pdpt) >> page_map_shift_pdpt);
     if(!(*PDPT_E & 1)){
+        /*
+        page_construct_PDPT_E(PDPT_E, flags, (uint64_t)page_pdpt_backup, prot);
+        page_pdpt_backup = (uint64_t*) mem_alloc(0x1000, 0x1000);
+        */
+        screenClear();
         screenPrintX64(1);
         while(1);
     }
     uint64_t* PD_B = (uint64_t*) (*PDPT_E & page_map_filter);
     uint64_t* PD_E = PD_B + ((vaddr & page_map_filter_pd) >> page_map_shift_pd);
     if(!(*PD_E & 1)){
-        screenPrintX64(2);
-        while(1);
+        page_construct_PD_E(PD_E, flags, (uint64_t)page_pd_backup, prot);
+        page_pd_backup = (uint64_t*) mem_alloc(0x1000, 0x1000);
     }
     uint64_t* PT_B = (uint64_t*) (*PD_E & page_map_filter);
     uint64_t* PT_E = PT_B + ((vaddr & page_map_filter_pt) >> page_map_shift_pt);
