@@ -24,11 +24,16 @@ LIB_DIR		 := kernel/lib/include
 GCC			 := gcc
 GCC_FLAGS    := -I $(LIB_DIR)
 
+.SILENT: OS.img
 
 #put everyting together
 OS.img: $(BIN_BOOT) $(BIN_KERNEL_PM) $(BIN_KERNEL)
 	cat $^ 1,44mb.img > tmp.img
 	dd if=tmp.img of=$@
+	echo ""
+	ls -lha $(BIN_KERNEL)
+	ls -lha $(BIN_BOOT)
+	ls -lha $(BIN_KERNEL_PM)
 
 #compile bootloader
 $(BIN_BOOT): $(ASM_BOOT)
