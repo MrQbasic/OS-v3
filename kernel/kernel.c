@@ -117,12 +117,13 @@ void main(){
     screenPrintChars(kernelOkMsg);
 
     //print new end + start of kernel
-    char startMsg[] = "Kernel start : /e";
+    char startMsg[] = "Kernel start: /e";
     screenPrintChars(startMsg);screenPrintX64(startofkernel);screenNl();
-    char endMsg[]   = "Kernel end   : /e";
+    char endMsg[]   = "Kernel end  : /e";
     screenPrintChars(endMsg);screenPrintX64(endofkernel);screenNl();
     
     pciCheckBus();
+    pciPrintInfo();
     
     //end of kernel
     screenPrintChars(kernelOkMsg);
