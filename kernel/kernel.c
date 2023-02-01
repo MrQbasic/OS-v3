@@ -8,6 +8,7 @@ void _start(){
 #include "cpu/cpu.h"
 #include "mem/mem.h"
 #include "pci/pci.h"
+#include "disk/disk.h"
 
 char kernelStartMsg[] = "---Kernel---/n/e";
 char kernelPicMsg[]   = "Setup PICs/e";
@@ -122,8 +123,19 @@ void main(){
     char endMsg[]   = "Kernel end  : /e";
     screenPrintChars(endMsg);screenPrintX64(endofkernel);screenNl();
     
+    //print pci info
     pciCheckBus();
     pciPrintInfo();
+
+    //search for disks
+    char diskNotFoundError[] = "NO DISK FOUND IN SYSTEM!/e";
+    int disk_error = disk_searchDisks();
+    if(disk_error == 0){
+        screenPrintChars(diskNotFoundError);
+        while(1);
+    }else{
+
+    }
     
     //end of kernel
     screenPrintChars(kernelOkMsg);

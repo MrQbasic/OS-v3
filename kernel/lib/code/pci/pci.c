@@ -20,8 +20,15 @@ uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offs
 
 
 uint16_t  pci_devices_amount = 0;
-uint16_t *pci_devices_address;
+uint16_t *pci_devices_address = 0;
 
+uint16_t* pciGetDeviceTable(uint16_t* amount){
+    if(pci_devices_address != 0){
+        pciCheckBus();
+    }
+    *amount = pci_devices_amount;
+    return pci_devices_address;
+}
 
 void pciCheckBus(){
     //check if we need to clear prev dev cfg
