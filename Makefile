@@ -22,7 +22,7 @@ H_KERNEL     := $(shell find kernel/lib/include/ -name '*.h')
 LIB_DIR		 := kernel/lib/include
 
 GCC			 := gcc
-GCC_FLAGS    := -I $(LIB_DIR)
+GCC_FLAGS    := -fno-stack-protector -I $(LIB_DIR)
 
 .SILENT: OS.img
 
@@ -31,11 +31,11 @@ OS.img: $(BIN_BOOT) $(BIN_KERNEL_PM) $(BIN_KERNEL)
 	cat $^ 1,44mb.img > tmp.img
 	dd if=tmp.img of=$@ bs=512 count=2880
 	echo ""
-	ls -la 1,44mb.img
-	ls -la OS.img
-	ls -la $(BIN_KERNEL)
-	ls -la $(BIN_BOOT)
-	ls -la $(BIN_KERNEL_PM)
+	ls -lha 1,44mb.img
+	ls -lha OS.img
+	ls -lha $(BIN_KERNEL)
+	ls -lha $(BIN_BOOT)
+	ls -lha $(BIN_KERNEL_PM)
 
 #compile bootloader
 $(BIN_BOOT): $(ASM_BOOT)
