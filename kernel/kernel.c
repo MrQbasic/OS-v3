@@ -134,6 +134,7 @@ void main(){
         screenPrintChars(diskNotFoundError);
         while(1);
     }
+    disk_init();
     
     //end of kernel
     screenPrintChars(kernelOkMsg);

@@ -31,13 +31,19 @@ int disk_searchDisks(){
             disk_found_ahci_amount++; 
         }
     }
+
     if(disk_found_ahci_amount != 0){
         char info[] =  "NUMBER OF AHCI DEV: /e";
         screenPrintChars(info); screenPrintX16(disk_found_ahci_amount);screenNl();
         return 1;
     }
 
-
     return 0;
 }
 
+
+void disk_init(){
+    if(disk_found_ahci_amount != 0){
+        int error = ahci_init_disk(disk_found_ahci_amount, disk_found_ahci_addr);
+    }
+}
