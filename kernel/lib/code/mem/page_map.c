@@ -66,11 +66,11 @@ void page_construct_PT_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t 
 #define page_map_filter_pd   0x000000003FE00000
 #define page_map_filter_pt   0x00000000001FF000
 
-#define page_map_shift_pml5 56-12
-#define page_map_shift_pml4 47-12
-#define page_map_shift_pdpt 38-12
-#define page_map_shift_pd   29-12
-#define page_map_shift_pt   20-12
+#define page_map_shift_pml5 48
+#define page_map_shift_pml4 39
+#define page_map_shift_pdpt 30
+#define page_map_shift_pd   21
+#define page_map_shift_pt   12
 
 void page_map_PML4(uint64_t vaddr, uint64_t paddr, uint8_t flags, uint8_t prot){
     //limit addr args
@@ -126,7 +126,7 @@ void page_map_PML5(uint64_t vaddr, uint64_t paddr, uint8_t flags, uint8_t prot){
 }
 
 
-//retuen 0->OK 1->PT 2->PD 3->PDPT 4->PML4
+//return  0->OK  1->PT  2->PD  3->PDPT  4->PML4
 int page_trace_PML4(uint64_t vaddr, uint64_t* paddr){
     //limit addr args
     vaddr = vaddr & page_map_filter;
@@ -150,7 +150,7 @@ int page_trace_PML4(uint64_t vaddr, uint64_t* paddr){
     return 0;
 }
 
-//retuen 0->OK  1->PD  2->PDPT  3->PML4  4->PML5
+//return  0->OK  1->PT  2->PD  3->PDPT  4->PML4
 int page_trace_PML5(uint64_t vaddr, uint64_t* paddr){
     //limit addr args
     vaddr = vaddr & page_map_filter;

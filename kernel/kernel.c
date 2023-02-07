@@ -102,14 +102,14 @@ void main(){
     endofkernel = (uint64_t) &endptr;
     startofkernel = (uint64_t) &_start;
 
-    //setup page allocator
-    screenPrintChars(kernelPMemMsg);
-    mem_palloc_init(&endofkernel);
-    screenPrintChars(kernelOkMsg);
-
     //setup pageing
     screenPrintChars(kernelPageMsg);
     page_map_init(MAXPHYADDR, MAXLINADDR);
+    screenPrintChars(kernelOkMsg);
+
+    //setup page allocator
+    screenPrintChars(kernelPMemMsg);
+    mem_palloc_init(&startofkernel, &endofkernel);
     screenPrintChars(kernelOkMsg);
 
     //setup memory allocator
@@ -133,8 +133,6 @@ void main(){
     if(disk_error == 0){
         screenPrintChars(diskNotFoundError);
         while(1);
-    }else{
-
     }
     
     //end of kernel

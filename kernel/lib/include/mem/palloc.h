@@ -1,4 +1,4 @@
-#include "../def.h"
+#include "def.h"
 
 enum {
     MEMORYMAP_TYPE_RAM = 1,
@@ -20,10 +20,15 @@ struct MEMORYMAP_ENTRY{
 
 
 //return: addidtional kernelend offset
-void mem_palloc_init(uint64_t* kernelend);
+void mem_palloc_init(uint64_t* kernelstart, uint64_t* kernelend);
 
 
 //returns:
 //  0 -> OK
 //  1 -> NO SPACE
 int mem_palloc(uint64_t* addr, uint64_t number_of_pages);
+
+//returns:
+//  0 -> OK
+//  1 -> NO MATCHES
+int mem_pfree(uint64_t addr, uint64_t number_of_pages);
