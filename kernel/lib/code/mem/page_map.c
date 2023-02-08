@@ -41,10 +41,28 @@ void page_map_init(uint64_t maxphyaddr, uint64_t maxlinaddr){
     page_pd_backup = &(page_pd_backup_s[0]);
 }
 
+//flags bit 0-7. present = 1. size = 0
+//prot is 1 bit. bit 1 = XD
+void page_construct_PML4_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t prot){
+    *entry = 0;
+    *entry |= (uint64_t) (flags | 1);
+    *entry |= (uint64_t) (addr & page_map_filter);
+    *entry |= (uint64_t) (((uint64_t)(prot & 0x1)) << 63);
+}
+
+//flags bit 0-7. present = 1. size = 0
+//prot is 1 bit. bit 1 = XD
+void page_construct_PDPT_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t prot){
+    *entry = 0;
+    *entry |= (uint64_t) (flags | 1);
+    *entry |= (uint64_t) (addr & page_map_filter);
+    *entry |= (uint64_t) (((uint64_t)(prot & 0x1)) << 63);
+}
 
 //flags bit 0-7. present = 1. size = 0
 //prot is 1 bit. bit 1 = XD
 void page_construct_PD_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t prot){
+    *entry = 0;
     *entry |= (uint64_t) (flags | 1);
     *entry |= (uint64_t) (addr & page_map_filter);
     *entry |= (uint64_t) (((uint64_t)(prot & 0x1)) << 63);
@@ -53,6 +71,7 @@ void page_construct_PD_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t 
 //flags bit 1-8. present bit is set to 1
 //prot is 5 bit. bit 0-3 = KEY. bit 4 = XD
 void page_construct_PT_E(uint64_t* entry, uint8_t flags, uint64_t addr, uint8_t prot){    
+    *entry = 0;
     *entry |= (uint64_t) ((flags << 1) | 1);
     *entry |= (uint64_t) (addr & page_map_filter);
     *entry |= (uint64_t) (((uint64_t)(prot & 0x1F)) << 59);
@@ -77,35 +96,29 @@ void page_map_PML4(uint64_t vaddr, uint64_t paddr, uint8_t flags, uint8_t prot){
     vaddr = vaddr & page_map_filter;
     paddr = paddr & page_map_filter;
     //-
-    uint64_t* PML4_E  = pagemap_start + ((vaddr & page_map_filter_pml4) >> page_map_shift_pml4);
-    if(!(*PML4_E & 1)){
-        /*
+    uint64_t* PML4_E  = pagemap_start + ((vaddr & page_map_filter_pml4) >> page_map_shift_pml4) * 8;
+    if((*PML4_E & 1) != 1){
         page_construct_PML4_E(PML4_E, flags, (uint64_t)page_pml4_backup, prot);
         page_pml4_backup = (uint64_t*) mem_alloc(0x1000, 0x1000);
-        */
-        screenClear();
-        screenPrintX64(1);
-        while(1);
     }
-    uint64_t* PDPT_B = (uint64_t*) (*PML4_E & page_map_filter);
-    uint64_t* PDPT_E = PDPT_B + ((vaddr & page_map_filter_pdpt) >> page_map_shift_pdpt);
-    if(!(*PDPT_E & 1)){
-        /*
+
+    uint64_t PDPT_B = ((uint64_t) (*PML4_E)  &  page_map_filter);
+    uint64_t* PDPT_E = (uint64_t*) (PDPT_B + (((vaddr & page_map_filter_pdpt) >> page_map_shift_pdpt) * 8));
+    if((*PDPT_E & 1) != 1){
         page_construct_PDPT_E(PDPT_E, flags, (uint64_t)page_pdpt_backup, prot);
         page_pdpt_backup = (uint64_t*) mem_alloc(0x1000, 0x1000);
-        */
-        screenClear();
-        screenPrintX64(1);
-        while(1);
     }
-    uint64_t* PD_B = (uint64_t*) (*PDPT_E & page_map_filter);
-    uint64_t* PD_E = PD_B + ((vaddr & page_map_filter_pd) >> page_map_shift_pd);
-    if(!(*PD_E & 1)){
+    
+    uint64_t PD_B = ((uint64_t) (*PDPT_E)  &  page_map_filter);
+    uint64_t* PD_E = (uint64_t*) (PD_B + (((vaddr & page_map_filter_pd) >> page_map_shift_pd) * 8));
+    if((*PD_E & 1) != 1){
         page_construct_PD_E(PD_E, flags, (uint64_t)page_pd_backup, prot);
         page_pd_backup = (uint64_t*) mem_alloc(0x1000, 0x1000);
+        screenClear();
     }
-    uint64_t* PT_B = (uint64_t*) (*PD_E & page_map_filter);
-    uint64_t* PT_E = PT_B + ((vaddr & page_map_filter_pt) >> page_map_shift_pt);
+    
+    uint64_t PT_B = ((uint64_t) (*PD_E) & page_map_filter);
+    uint64_t* PT_E = (uint64_t*) (PT_B + (((vaddr & page_map_filter_pt) >> page_map_shift_pt) * 8));
     page_construct_PT_E(PT_E, flags, paddr, prot);
 }
 
