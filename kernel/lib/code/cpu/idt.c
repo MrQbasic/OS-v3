@@ -12,6 +12,15 @@ void idt_set(uint64_t offset, uint16_t segSel, uint8_t idte, uint8_t flags){
    IDT[idte].selector = segSel;
    IDT[idte].type_attributes = flags;
    IDT[idte].zero = 0;
+
+   IDT[idte].offset_1 = -1;
+   IDT[idte].offset_2 = -1;
+   IDT[idte].offset_3 = -1;
+   IDT[idte].selector = -1;
+   IDT[idte].type_attributes = -1;
+   IDT[idte].zero = -1;
+   IDT[idte].ist = -1;
+   
 }
 
 char msgint[] = "INT!/n/e";
@@ -25,7 +34,7 @@ void  idt_init(){
    //get ptr to external default isr
    extern void idt_isr_default();
    //setupt idt
-   for(int i=0; i<256; i++){
+   for(int i=0; i<100; i++){
       idt_set((uint64_t) idt_isr_default, IDT_DEFAULT_SEGSEL, i, IDT_DEFAULT_FLAG);
    }
    //setupt idtr

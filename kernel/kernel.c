@@ -25,6 +25,7 @@ uint64_t endofkernel;
 uint64_t startofkernel;
 
 void main(){
+
     //setup screen
     screenClear();
     screenPrintChars(kernelStartMsg);
@@ -38,23 +39,23 @@ void main(){
 
     //init IDT
     screenPrintChars(kernelIdtMsg);
-    idt_init();
+    //idt_init();
     screenPrintChars(kernelOkMsg);
 
     //setup exceptions
-    idt_set((uint64_t)  divByZeroISR, 0x08, 0x00, EXC_IDT_FLAG);
-    idt_set((uint64_t)      debugISR, 0x08, 0x01, EXC_IDT_FLAG);
-    idt_set((uint64_t)        nmiISR, 0x08, 0x02, EXC_IDT_FLAG);
-    idt_set((uint64_t) breakpointISR, 0x08, 0x03, EXC_IDT_FLAG);
-    idt_set((uint64_t)   overflowISR, 0x08, 0x04, EXC_IDT_FLAG);
-    idt_set((uint64_t)      boundISR, 0x08, 0x05, EXC_IDT_FLAG);
-    idt_set((uint64_t)     opcodeISR, 0x08, 0x06, EXC_IDT_FLAG);
-    idt_set((uint64_t)     deviceISR, 0x08, 0x07, EXC_IDT_FLAG);
-    idt_set((uint64_t)   doubleF_ISR, 0x08, 0x08, EXC_IDT_FLAG);
-    idt_set((uint64_t)       TSS_ISR, 0x08, 0x0A, EXC_IDT_FLAG);
-    idt_set((uint64_t)    segPresISR, 0x08, 0x0B, EXC_IDT_FLAG);
-    idt_set((uint64_t)   segStackISR, 0x08, 0x0C, EXC_IDT_FLAG);
-    idt_set((uint64_t)        gpfISR, 0x08, 0x0D, EXC_IDT_FLAG);
+    //idt_set((uint64_t)  divByZeroISR, 0x08, 0x00, EXC_IDT_FLAG);
+    //idt_set((uint64_t)      debugISR, 0x08, 0x01, EXC_IDT_FLAG);
+    //idt_set((uint64_t)        nmiISR, 0x08, 0x02, EXC_IDT_FLAG);
+    //idt_set((uint64_t) breakpointISR, 0x08, 0x03, EXC_IDT_FLAG);
+    //idt_set((uint64_t)   overflowISR, 0x08, 0x04, EXC_IDT_FLAG);
+    //idt_set((uint64_t)      boundISR, 0x08, 0x05, EXC_IDT_FLAG);
+    //idt_set((uint64_t)     opcodeISR, 0x08, 0x06, EXC_IDT_FLAG);
+    //idt_set((uint64_t)     deviceISR, 0x08, 0x07, EXC_IDT_FLAG);
+    //idt_set((uint64_t)   doubleF_ISR, 0x08, 0x08, EXC_IDT_FLAG);
+    //idt_set((uint64_t)       TSS_ISR, 0x08, 0x0A, EXC_IDT_FLAG);
+    //idt_set((uint64_t)    segPresISR, 0x08, 0x0B, EXC_IDT_FLAG);
+    //idt_set((uint64_t)   segStackISR, 0x08, 0x0C, EXC_IDT_FLAG);
+    //idt_set((uint64_t)        gpfISR, 0x08, 0x0D, EXC_IDT_FLAG);
     idt_set((uint64_t)         pfISR, 0x08, 0x0E, EXC_IDT_FLAG);
     idt_set((uint64_t)        x87ISR, 0x08, 0x10, EXC_IDT_FLAG);
     idt_set((uint64_t)  alignmentISR, 0x08, 0x11, EXC_IDT_FLAG);
@@ -65,6 +66,10 @@ void main(){
     idt_set((uint64_t)      hyperISR, 0x08, 0x1C, EXC_IDT_FLAG);
     idt_set((uint64_t)        vmmISR, 0x08, 0x1D, EXC_IDT_FLAG);
     idt_set((uint64_t)        secISR, 0x08, 0x1E, EXC_IDT_FLAG);
+    uint16_t x = 0xABCD;
+    //screenPrint("Hello /xW World!/n/e",x);
+    while(1);
+    
 
     //setup system counter
     screenPrintChars(kernelCntMsg);
@@ -135,6 +140,8 @@ void main(){
         while(1);
     }
     disk_init();
+
+    
     
     //end of kernel
     screenPrintChars(kernelOkMsg);

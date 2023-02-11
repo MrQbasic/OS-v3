@@ -29,3 +29,14 @@ void screenPrintX32(uint32_t inp);
 void screenPrintX64(uint64_t inp);
 
 void screenClear();
+
+
+
+//commands:
+//  /e  ->  end of string
+//  /n  ->  new line
+//  /xB ->  print hex byte  (8-bit)
+//  /xW ->  print hex word  (16-bit)
+//  /xD ->  print hex dword (32-bit)
+//  /xQ ->  print hex qword (64-bit)
+void screenPrint(const char* fmt,...);
