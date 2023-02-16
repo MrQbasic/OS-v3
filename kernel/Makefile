@@ -5,7 +5,7 @@ DIR_INCLUDE := src/include
 NASM	   := nasm
 NASM_FLAGS := -f elf64
 GCC        := gcc
-GCC_FLAGS  := -fno-stack-protector -I $(DIR_INCLUDE)/
+GCC_FLAGS  := -fno-stack-protector -I $(DIR_INCLUDE)/ -g
 LD		   := ld
 LD_FLAGS   := --no-relax -T linker.ld
 

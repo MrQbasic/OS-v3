@@ -2,7 +2,7 @@
 load_kernel:
 	pusha
 	mov bx, KERNEL_OFFSET	; offset to load the sectors at
-	mov al, 50		        ; number of sectors
+	mov al, 54		        ; number of sectors
 	mov dl, [BOOT_DRV]	    ; id of the drive
 	mov ch, 0		        ; cylinder (0 based)
 	mov cl, 2		        ; sector (1 based), skip the MBR and start from sector 2

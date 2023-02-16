@@ -6,9 +6,9 @@ struct IDT64 IDT[256];
 struct IDTR_64 IDTR;
 
 void idt_set(uint64_t offset, uint16_t segSel, uint8_t idte, uint8_t flags){
-   IDT[idte].offset_1 = (uint16_t) offset;
-   IDT[idte].offset_2 = (uint32_t) (offset >> 16);
-   IDT[idte].offset_3 = (uint32_t) (offset >> 32);
+   //IDT[idte].offset_1 = (uint16_t) offset;
+   //IDT[idte].offset_2 = (uint32_t) (offset >> 16);
+   //IDT[idte].offset_3 = (uint32_t) (offset >> 32);
    IDT[idte].selector = segSel;
    IDT[idte].type_attributes = flags;
    IDT[idte].zero = 0;

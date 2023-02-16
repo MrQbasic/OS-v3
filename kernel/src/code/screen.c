@@ -1,4 +1,5 @@
 #include "screen.h"
+#include <stdarg.h>
 
 int cur_X = 0;
 int cur_Y = 0;
@@ -130,30 +131,32 @@ void screenClear(){
 }
 
 void screenPrint(const char* fmt, ...){
-    screenPrintX64(fmt);
-    screenNl(); 
-    int limit = 20;
-    while(limit > 1){
+    va_list args;
+    va_start(args,fmt);
+    while(1){
         if(*fmt == '/'){
             fmt++;
             if(*fmt == 'n'){
                 screenNl();
             }else if(*fmt == 'e'){
+                va_end(args);
                 return;
             }else if(*fmt == 'x'){
                 fmt++;
-                if(*fmt == 'B'){
-                    screenClear();
-                    screenPrintChar(*fmt);
-                    screenPrintChar(*fmt);
-                    screenPrintChar(*fmt);
-
+                switch(*fmt){
+                case 'B':
+                    screenPrintX8((uint8_t) va_arg(args, uint32_t)); break;
+                case 'W':
+                    screenPrintX16((uint16_t) va_arg(args, uint32_t)); break;
+                case 'D':
+                    screenPrintX32(va_arg(args, uint32_t)); break;
+                case 'Q': 
+                    screenPrintX64(va_arg(args, uint64_t)); break;
                 }
             }
         }else{
             screenPrintChar(*fmt);
         }
         fmt++;
-        limit--;
     }
 }

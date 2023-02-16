@@ -67,10 +67,6 @@ void main(){
     idt_set((uint64_t)        vmmISR, 0x08, 0x1D, EXC_IDT_FLAG);
     idt_set((uint64_t)        secISR, 0x08, 0x1E, EXC_IDT_FLAG);
 
-    screenPrint("HELLO WORLD!/e");
-    while(1);
-    
-
     //setup system counter
     screenPrintChars(kernelCntMsg);
     syscounter_init();
@@ -78,6 +74,8 @@ void main(){
 
     //enable irqs    
     //__asm__("sti");
+
+    screenPrint("HELLO WORLD!/xB/n/e",pic_0_base);
 
     //print CPU info
     char *vendorstr = cpuid_getVendor(); 
@@ -87,8 +85,19 @@ void main(){
     char feat2[]  = "CPU feature EDX: /e";
     screenPrintChars(vendor);
     screenPrintChars(vendorstr); screenNl();
-    screenPrintChars(feat1);screenPrintX32(cpu_features[0]); screenNl();
+
+    screenPrintChars(feat1);
+    screenPrintX32(cpu_features[0]);
+
+    screenPrint("/n/nHELLO WORLD!/n/e");
+    while(1);
+
+    screenPrintX32(cpu_features[0]); screenNl();
     screenPrintChars(feat2);screenPrintX32(cpu_features[1]); screenNl();
+
+    //screenPrint("HELLO WORLD!/e");
+
+    while(1);
 
     //get max of phy and lin addr range
     uint64_t reg;
