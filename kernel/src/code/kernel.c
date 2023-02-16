@@ -10,15 +10,6 @@ void _start(){
 #include "pci/pci.h"
 #include "disk/disk.h"
 
-char kernelStartMsg[] = "---Kernel---/n/e";
-char kernelPicMsg[]   = "Setup PICs/e";
-char kernelIdtMsg[]   = "Setup ITD/e";
-char kernelCntMsg[]   = "Setup PIT IRQ/e";
-char kernelPageMsg[]  = "Setup pageing system/e";
-char kernelPMemMsg[]  = "Setup page allocator/e";
-char kernelMemMsg[]   = "Setup memory allocator/e";
-char kernelOkMsg[]    = " OK/n/e";
-
 uint8_t MAXPHYADDR, MAXLINADDR;
 
 uint64_t endofkernel;
@@ -28,19 +19,19 @@ void main(){
 
     //setup screen
     screenClear();
-    screenPrintChars(kernelStartMsg);
+    screenPrint("---Kernel---/n/e");
 
     //setup pic (remap IRQs)
     uint8_t pic_0_base = 0x20;
     uint8_t pic_1_base = 0x28;
-    screenPrintChars(kernelPicMsg);
+    screenPrint("Setup PICs... /e");
     pic_remap(pic_0_base, pic_1_base);
-    screenPrintChars(kernelOkMsg);
+    screenPrint("OK/n/e");
 
     //init IDT
-    screenPrintChars(kernelIdtMsg);
+    screenPrint("Setup IDT... /e");
     idt_init();
-    screenPrintChars(kernelOkMsg);
+    screenPrint("OK/n/e");
 
     //setup exceptions
     idt_set((uint64_t)  divByZeroISR, 0x08, 0x00, EXC_IDT_FLAG);
@@ -68,36 +59,19 @@ void main(){
     idt_set((uint64_t)        secISR, 0x08, 0x1E, EXC_IDT_FLAG);
 
     //setup system counter
-    screenPrintChars(kernelCntMsg);
+    screenPrint("Setup PIT IRQ... /e");
     syscounter_init();
-    screenPrintChars(kernelOkMsg);
+    screenPrint("OK/n/e");
 
     //enable irqs    
     //__asm__("sti");
 
-    screenPrint("HELLO WORLD!/xB/n/e",pic_0_base);
-
     //print CPU info
     char *vendorstr = cpuid_getVendor(); 
     uint32_t *cpu_features = cpuid_getFeatures();
-    char vendor[] = "CPU vendor string: /e";
-    char feat1[]  = "CPU feature ECX: /e";
-    char feat2[]  = "CPU feature EDX: /e";
-    screenPrintChars(vendor);
-    screenPrintChars(vendorstr); screenNl();
-
-    screenPrintChars(feat1);
-    screenPrintX32(cpu_features[0]);
-
-    screenPrint("/n/nHELLO WORLD!/n/e");
-    while(1);
-
-    screenPrintX32(cpu_features[0]); screenNl();
-    screenPrintChars(feat2);screenPrintX32(cpu_features[1]); screenNl();
-
-    //screenPrint("HELLO WORLD!/e");
-
-    while(1);
+    screenPrint("CPU vendor: /c/n/e",vendorstr);
+    screenPrint("CPU feature ECX: /xD/n/e",cpu_features[0]);
+    screenPrint("CPU feature EDX: /xD/n/e",cpu_features[1]);
 
     //get max of phy and lin addr range
     uint64_t reg;
@@ -106,10 +80,8 @@ void main(){
                          "=a"(reg):);
     MAXPHYADDR = (uint8_t) reg;
     MAXLINADDR = (uint8_t) (reg >> 8);
-    char PHYSTR[] = "PHY ADDR BITS: /e";
-    char LINSTR[] = "LIN ADDR BITS: /e";
-    screenPrintChars(PHYSTR);screenPrintX8(MAXPHYADDR);screenNl();
-    screenPrintChars(LINSTR);screenPrintX8(MAXLINADDR);screenNl();
+    screenPrint("PHY ADDR BITS: /xB/n/e",MAXPHYADDR);
+    screenPrint("LIN ADDR BITS: /xB/n/e",MAXLINADDR);
 
     //get end of kernel
     extern uint64_t endptr;
@@ -117,35 +89,32 @@ void main(){
     startofkernel = (uint64_t) &_start;
 
     //setup pageing
-    screenPrintChars(kernelPageMsg);
+    screenPrint("Setup pageing system... /e");
     page_map_init(MAXPHYADDR, MAXLINADDR);
-    screenPrintChars(kernelOkMsg);
+    screenPrint("OK/n/e");
 
     //setup page allocator
-    screenPrintChars(kernelPMemMsg);
+    screenPrint("Setup page allocator... /e");
     mem_palloc_init(&startofkernel, &endofkernel);
-    screenPrintChars(kernelOkMsg);
+    screenPrint("OK/n/e");
 
     //setup memory allocator
-    screenPrintChars(kernelMemMsg);
+    screenPrint("Setup memory allocator... /e");
     mem_init(&endofkernel, 0x10000, MAXLINADDR);
-    screenPrintChars(kernelOkMsg);
+    screenPrint("OK/n/e");
 
     //print new end + start of kernel
-    char startMsg[] = "Kernel start: /e";
-    screenPrintChars(startMsg);screenPrintX64(startofkernel);screenNl();
-    char endMsg[]   = "Kernel end  : /e";
-    screenPrintChars(endMsg);screenPrintX64(endofkernel);screenNl();
+    screenPrint("Kernel start: /xQ/n/e",startofkernel);
+    screenPrint("Kernel end  : /xQ/n/e",endofkernel);
     
     //print pci info
     pciCheckBus();
     pciPrintInfo();
 
     //search for disks
-    char diskNotFoundError[] = "NO DISK FOUND IN SYSTEM!/e";
     int disk_error = disk_searchDisks();
     if(disk_error == 0){
-        screenPrintChars(diskNotFoundError);
+        screenPrint("NO DISK FOUND IN SYSTEM!/n/e");
         while(1);
     }
     disk_init();
@@ -153,6 +122,6 @@ void main(){
     
     
     //end of kernel
-    screenPrintChars(kernelOkMsg);
+    screenPrint("DONE!/e");
     while(1);
 }

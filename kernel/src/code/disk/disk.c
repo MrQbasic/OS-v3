@@ -23,8 +23,7 @@ int disk_searchDisks(){
         uint8_t    class = (uint8_t) (cfg >> 8);
         if(class == 0x01 && subclass == 0x06){
             if(disk_found_ahci_amount == (DISK_MAX_AHCI-1)){
-                char error[] = "DISK ERROR: TOO MANY AHCI INTERFACES FOUND!/e";
-                screenPrintChars(error);screenNl();
+                screenPrint("DISK ERROR: TOO MANY AHCI INTERFACES FOUND!/e");
                 while(1);
             }
             disk_found_ahci_addr[disk_found_ahci_amount] = pci_devices_addess[i];
@@ -33,8 +32,7 @@ int disk_searchDisks(){
     }
 
     if(disk_found_ahci_amount != 0){
-        char info[] =  "NUMBER OF AHCI DEV: /e";
-        screenPrintChars(info); screenPrintX16(disk_found_ahci_amount);screenNl();
+        screenPrint("NUMBER OF AHCI DEV: /xW /n/e",disk_found_ahci_amount);
         return 1;
     }
 

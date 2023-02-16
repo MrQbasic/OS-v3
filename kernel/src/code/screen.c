@@ -153,6 +153,8 @@ void screenPrint(const char* fmt, ...){
                 case 'Q': 
                     screenPrintX64(va_arg(args, uint64_t)); break;
                 }
+            }else if(*fmt == 'c'){
+                screenPrintChars(va_arg(args, char*));
             }
         }else{
             screenPrintChar(*fmt);

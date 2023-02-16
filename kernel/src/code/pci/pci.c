@@ -61,8 +61,6 @@ void pciCheckBus(){
     }
 }
 
-char pciNumOfDevStr[] = "NUMBER OF PCI DEV: /e";
-
 void pciPrintInfo(){
-    screenPrintChars(pciNumOfDevStr); screenPrintX16(pci_devices_amount); screenNl();      
+    screenPrint("NUMBER OF PCI DEV: /xW/n/e",pci_devices_amount);    
 }

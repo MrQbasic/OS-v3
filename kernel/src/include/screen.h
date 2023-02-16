@@ -39,4 +39,5 @@ void screenClear();
 //  /xW ->  print hex word  (16-bit)
 //  /xD ->  print hex dword (32-bit)
 //  /xQ ->  print hex qword (64-bit)
+//  /c  ->  print char*
 void screenPrint(const char* fmt,...);

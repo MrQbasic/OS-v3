@@ -23,9 +23,7 @@ int ahci_init_disk(uint16_t disk_count, uint16_t* disk_addr){
         error |= mem_pfree(paddr,1);
         //unexpected error 
         if(error != 0){
-            char error[] = "OUT OF MEMORY!/n/e";
-            screenClear();
-            screenPrintChars(error);
+            screenPrint("OUT OF MEMORY!/n/e");
             while(1);
         }
         page_map_PML4(ahci_abar_lin[i], ahci_abar_phy[i], 0b00010001, 0x00);
