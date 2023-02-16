@@ -130,7 +130,8 @@ void screenClear(){
 }
 
 void screenPrint(const char* fmt, ...){
-    screenNl();screenPrintX64(fmt);
+    screenPrintX64(fmt);
+    screenNl(); 
     int limit = 20;
     while(limit > 1){
         if(*fmt == '/'){

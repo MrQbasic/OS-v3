@@ -8,6 +8,8 @@ FILE_OUT := OS.img
 
 .SILENT: $(FILE_OUT) $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
 
+all: clean $(FILE_OUT)
+
 #CREATE FINAL IMAGE
 $(FILE_OUT): $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
 	cat $^ 1,44mb.img > tmp.img
