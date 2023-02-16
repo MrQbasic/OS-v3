@@ -1,6 +1,7 @@
 SECTIONS
 {
     . = 0xFE00000;
+    ENTRY(main)
     .text : { *(.text) }
     .data : { *(.data) }
     .rodata : { *(.rodata) }
@@ -9,5 +10,4 @@ SECTIONS
     .eh_frame : { *(.eh_frame) }
     .bss : { *(.bss) }
     .end : { *(.end) }
-    .comment : { *(.comment) }
 }

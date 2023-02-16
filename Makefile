@@ -1,76 +1,37 @@
-BIN_BOOT  := boot/bootsec.bin
-ASM_BOOT  := boot/bootsec.s
+DIR_KERNEL := kernel
+DIR_BOOT   := boot
 
-S_KERNEL_PM := kernel/PM/kernel-PM.s
-BIN_KERNEL_PM := kernel/PM/kernel-PM.bin
+FILE_BOOT_BIN   := $(DIR_BOOT)/boot.bin
+FILE_KERNEL_BIN := $(DIR_KERNEL)/kernel.bin
 
-BIN_KERNEL   := kernel/kernel.bin
+FILE_OUT := OS.img
 
-C_KERNEL_ISR := $(shell find kernel/lib/code -name '*.isr.c')
+.SILENT: $(FILE_OUT) $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
 
-C_KERNEL_TMP := kernel/kernel.c $(shell find kernel/lib/ -name '*.c')
-C_KERNEL     := $(filter-out $(C_KERNEL_ISR), $(C_KERNEL_TMP)) 
-
-S_KERNEL     := $(shell find kernel/lib/code/ -name '*.s')
-
-O_C_KERNEL   := $(patsubst kernel/%.c,kernel/%.o,$(C_KERNEL)) 
-O_ISR_KERNEL := $(patsubst kernel/%.c,kernel/%.o,$(C_KERNEL_ISR))
-O_S_KERNEL   := $(patsubst kernel/%.s,kernel/%.o,$(S_KERNEL))
-
-H_KERNEL     := $(shell find kernel/lib/include/ -name '*.h')
-
-LIB_DIR		 := kernel/lib/include
-
-GCC			 := gcc
-GCC_FLAGS    := -fno-stack-protector -I $(LIB_DIR)
-
-.SILENT: OS.img
-
-#put everyting together
-OS.img: $(BIN_BOOT) $(BIN_KERNEL_PM) $(BIN_KERNEL)
+#CREATE FINAL IMAGE
+$(FILE_OUT): $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
 	cat $^ 1,44mb.img > tmp.img
 	dd if=tmp.img of=$@ bs=512 count=2880
+	rm tmp.img
 	echo ""
-	ls -lha 1,44mb.img
 	ls -lha OS.img
-	ls -lha $(BIN_KERNEL)
-	ls -lha $(BIN_BOOT)
-	ls -lha $(BIN_KERNEL_PM)
+	ls -lha $(FILE_BOOT_BIN)
+	ls -lha $(FILE_KERNEL_BIN)
 
-#compile bootloader
-$(BIN_BOOT): $(ASM_BOOT)
-	cd ./boot; nasm bootsec.s -f bin -o bootsec.bin
 
-#compile kernel-pm -> obj
-$(BIN_KERNEL_PM): $(S_KERNEL_PM)
-	cd ./kernel/PM; nasm kernel-PM.s -f bin -o kernel-PM.bin
+$(FILE_BOOT_BIN):
+	cd $(DIR_BOOT); make
 
-#compile kernel
-$(BIN_KERNEL): $(O_C_KERNEL) $(O_S_KERNEL) $(O_ISR_KERNEL)
-	ld --no-relax -o kernel/kernel.elf -T linker.ld $^
-	objcopy -O binary -j .text -j .data -j .rodata -j .got -j .got.plt -j .eh_frame -j .bss -j .comment  kernel/kernel.elf $@
-
-$(O_C_KERNEL): %.o: %.c
-	$(GCC) $(GCC_FLAGS) -c $^ -o $@
-	
-$(O_S_KERNEL): %.o: %.s
-	nasm $^ -f elf64 -o $@ 
-
-$(O_ISR_KERNEL): %.o: %.c
-	$(GCC) $(GCC_FLAGS) -mgeneral-regs-only -c $^ -o $@
-
+$(FILE_KERNEL_BIN):
+	cd $(DIR_KERNEL); make
 
 clean:
-	rm -f kernel/PM/kernel-PM.bin
-	rm -f kernel/kernel.bin
-	rm -f kernel/kernel.elf
 	rm -f log.txt
-	rm -f tmp.img
 	rm -f OS.img
-	rm -f $(shell find ./kernel/ -type f -name "*.o")
+	rm -f $(shell find . -type f \( -name "*.o" -or -name "*.bin" -or -name "*.elf" \) )
 	clear
 
-run: OS.img
+run: $(FILE_OUT)
 	rm -f ./log.txt
 	clear
 	qemu-system-x86_64 \

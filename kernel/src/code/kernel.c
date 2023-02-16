@@ -39,7 +39,7 @@ void main(){
 
     //init IDT
     screenPrintChars(kernelIdtMsg);
-    //idt_init();
+    idt_init();
     screenPrintChars(kernelOkMsg);
 
     //setup exceptions
@@ -66,13 +66,8 @@ void main(){
     idt_set((uint64_t)      hyperISR, 0x08, 0x1C, EXC_IDT_FLAG);
     idt_set((uint64_t)        vmmISR, 0x08, 0x1D, EXC_IDT_FLAG);
     idt_set((uint64_t)        secISR, 0x08, 0x1E, EXC_IDT_FLAG);
-    
-    uint16_t x = 0xABCD;
-    screenPrintX64(screenPrintX64);screenNl();
-    screenPrintX64(_start);screenNl();
-    screenPrintX64(syscounter_init);screenNl();
-    screenPrintX64(main);screenNl();
-    screenPrint("HELLO WORLD! /n/e",x);
+
+    screenPrint("HELLO WORLD!/e");
     while(1);
     
 

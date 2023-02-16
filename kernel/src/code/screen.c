@@ -1,5 +1,4 @@
 #include "screen.h"
-#include <stdarg.h>
 
 int cur_X = 0;
 int cur_Y = 0;
@@ -131,7 +130,7 @@ void screenClear(){
 }
 
 void screenPrint(const char* fmt, ...){
-    screenNl();
+    screenNl();screenPrintX64(fmt);
     int limit = 20;
     while(limit > 1){
         if(*fmt == '/'){

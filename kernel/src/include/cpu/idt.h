@@ -1,6 +1,6 @@
 #include "def.h"
 
-struct IDT_ID64 {
+struct IDT_IDT64 {
    uint16_t offset_1;
    uint16_t selector;
    uint8_t  ist;
