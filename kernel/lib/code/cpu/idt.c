@@ -12,7 +12,7 @@ void idt_set(uint64_t offset, uint16_t segSel, uint8_t idte, uint8_t flags){
    IDT[idte].selector = segSel;
    IDT[idte].type_attributes = flags;
    IDT[idte].zero = 0;
-
+   
    IDT[idte].offset_1 = -1;
    IDT[idte].offset_2 = -1;
    IDT[idte].offset_3 = -1;

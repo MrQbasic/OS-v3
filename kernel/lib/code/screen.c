@@ -131,38 +131,29 @@ void screenClear(){
 }
 
 void screenPrint(const char* fmt, ...){
-    va_list args;
-    va_start(args,fmt);
-    screenPrintX64(fmt);
     screenNl();
-    while(1){
+    int limit = 20;
+    while(limit > 1){
         if(*fmt == '/'){
             fmt++;
-            switch(*fmt){
-                case 'n':
-                    screenNl(); break;
-                case 'e':
-                    va_end(args);
-                    return;
-                case 'x':
-                    fmt++;
-                    switch(*fmt){
-                        case 'B':
-                            screenPrintX8((uint8_t) va_arg(args, uint32_t)); break;
-                        case 'W':
-                            screenPrintX16((uint16_t) va_arg(args, uint32_t)); break;
-                        case 'D':
-                            screenPrintX32(va_arg(args, uint32_t)); break;
-                        case 'Q':
-                            screenPrintX64(va_arg(args, uint64_t)); break; 
-                    }
-                    break;
-                default:
-                    break;
+            if(*fmt == 'n'){
+                screenNl();
+            }else if(*fmt == 'e'){
+                return;
+            }else if(*fmt == 'x'){
+                fmt++;
+                if(*fmt == 'B'){
+                    screenClear();
+                    screenPrintChar(*fmt);
+                    screenPrintChar(*fmt);
+                    screenPrintChar(*fmt);
+
+                }
             }
         }else{
             screenPrintChar(*fmt);
         }
         fmt++;
+        limit--;
     }
 }

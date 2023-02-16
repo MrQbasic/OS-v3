@@ -48,7 +48,7 @@ $(BIN_KERNEL_PM): $(S_KERNEL_PM)
 #compile kernel
 $(BIN_KERNEL): $(O_C_KERNEL) $(O_S_KERNEL) $(O_ISR_KERNEL)
 	ld --no-relax -o kernel/kernel.elf -T linker.ld $^
-	objcopy -O binary -j .text -j .data -j .rodata -j .bss kernel/kernel.elf $@
+	objcopy -O binary -j .text -j .data -j .rodata -j .got -j .got.plt -j .eh_frame -j .bss -j .comment  kernel/kernel.elf $@
 
 $(O_C_KERNEL): %.o: %.c
 	$(GCC) $(GCC_FLAGS) -c $^ -o $@
