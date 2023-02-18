@@ -35,9 +35,10 @@ void screenClear();
 //commands:
 //  /e  ->  end of string
 //  /n  ->  new line
+//  /0  ->  clear screen
 //  /xB ->  print hex byte  (8-bit)
 //  /xW ->  print hex word  (16-bit)
 //  /xD ->  print hex dword (32-bit)
 //  /xQ ->  print hex qword (64-bit)
-//  /c  ->  print char*
+//  /c  ->  print char[] (ends with/e)
 void screenPrint(const char* fmt,...);

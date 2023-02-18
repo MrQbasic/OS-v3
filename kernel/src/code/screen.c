@@ -138,10 +138,13 @@ void screenPrint(const char* fmt, ...){
             fmt++;
             if(*fmt == 'n'){
                 screenNl();
+            }else if(*fmt == "0"){
+                screenClear();
             }else if(*fmt == 'e'){
                 va_end(args);
                 return;
             }else if(*fmt == 'x'){
+
                 fmt++;
                 switch(*fmt){
                 case 'B':
