@@ -43,9 +43,7 @@ int ahci_init_disk(uint16_t disk_count, uint16_t* disk_addr){
             impl = impl >> 1;
         }
         //rebase ports
-
-
-
+        ahci_port_rebase(ahci_abar[i]);
     }
     //setup 
 
@@ -81,4 +79,39 @@ void ahci_port_start_cmd(AHCI_HBA_PORT* port){
     while(port->cmd & AHCI_HBA_PORT_CMD_CR);
     port->cmd |= AHCI_HBA_PORT_CMD_FRE;
     port->cmd |= AHCI_HBA_PORT_CMD_ST;
+}
+
+void ahci_port_rebase(AHCI_HBA* ahci_hba){
+    uint64_t impl = (uint64_t) ahci_hba->ports_implemented;
+    impl = impl << 1;
+    int port_index = -1;
+    while(impl != 0){
+        //next port
+        port_index++;
+        impl = impl >> 1;
+        int type = ahci_port_check_type(&(ahci_hba->ports[port_index]));
+        if(type != AHCI_DEV_SATA) continue;
+        //get port ready
+        AHCI_HBA_PORT* port = &(ahci_hba->ports[port_index]);
+        ahci_port_stop_cmd(port);
+        //remap command list
+        uint64_t cmd_list_virt = mem_alloc(0x400,0x400);
+        uint64_t cmd_list_phy;
+        page_trace_PML4(cmd_list_virt, &cmd_list_phy);
+        cmd_list_phy += cmd_list_virt & 0x0FFF;
+        port->clb  = (uint32_t)  cmd_list_phy;
+        port->clbu = (uint32_t) (cmd_list_phy >> 32);
+        mem_write((void*) cmd_list_virt, 0,1024);
+        //remap fis
+        uint64_t fis_virt = mem_alloc(0x100, 0x100);
+        uint64_t fis_phy;
+        page_trace_PML4(fis_virt, &fis_phy);
+        fis_phy += cmd_list_virt & 0x0FFF;
+        port->fb  = (uint32_t)  cmd_list_phy;
+        port->fbu = (uint32_t) (cmd_list_phy >> 32);
+        mem_write((void*) fis_virt, 0, 256);
+
+
+        //screenPrint("ASDF/n/e");
+    }
 }
