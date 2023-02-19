@@ -61,13 +61,25 @@ void mem_palloc_init(uint64_t* kernelstart, uint64_t* kernelend){
                 tbl_entry_start[byte_offset] = tbl_entry_start[byte_offset] & (0xFF ^ (1 << bit_offset));
                 
             }
-            return;
+            //return;
         }
         tbl_entry_start = &tbl_entry_start[entry_size / 0x8000];
     }
     //unexpected error
     char errormsg[] = "/nCANT GET ENTRY OF MEMORYMAP MATCHING KERNEL ADDR!/e";
-    screenPrintChars(errormsg);
+    screenPrint("/0CANT GET ENTRY OF MEMORYMAP MATCHING KERNEL ADDR!/n/e");
+    screenPrint("PHY: /xQ LIN: /xQ/n/e",paddr_start,*kernelstart);
+    screenPrint("--MEMORY MAP--/n/n/e");
+    screenPrint(" BASE               SIZE               TYPE/n/e");
+    screenPrint("+------------------+------------------+----------+/n/e");
+    for(int i=0; i<*memorymap_count; i++){
+        uint64_t base = memorymap[i].base;
+        uint64_t size = memorymap[i].length;
+        uint32_t type = memorymap[i].type;
+        screenPrint("|/xQ|/xQ|/xD|/n/e",base,size,type);
+    }
+    screenPrint("+------------------+------------------+----------+/n/e");
+
     while(1);
 }
 

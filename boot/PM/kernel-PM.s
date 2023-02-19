@@ -1,6 +1,6 @@
 ;https://wiki.osdev.org/Setting_Up_Long_Mode
 ;https://wiki.osdev.org/Detecting_Memory_(x86)#Getting_an_E820_Memory_Map
-[org 0x1000]
+[org 0x8000]
 [bits 16]
     ;kill cursor
     mov ah, 0x01
@@ -34,7 +34,7 @@ memorymap:
 
 	db "THIS IS THE KERNEL MADE BY LEON"
 
-%define PM_STACK 0x90000
+%define PM_STACK 0x8000
 PM_enter:
 	cli
 	lgdt[gdtrbuffer]

@@ -15,8 +15,8 @@ struct MEMORYMAP_ENTRY{
 }__attribute__((packed));
 
 
-#define MEMORYMAP_COUNT_PTR 0x2000
-#define MEMORYMAP_START_PTR 0x2002
+#define MEMORYMAP_COUNT_PTR 0x9000
+#define MEMORYMAP_START_PTR 0x9002
 
 
 //return: addidtional kernelend offset

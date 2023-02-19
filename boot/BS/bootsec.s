@@ -13,11 +13,12 @@ main:
 	sti			        ; enable interrupts
 	mov [BOOT_DRV], dl	; remember the boot device
 	call load_kernel	; actually load the system
+	
 	call KERNEL_OFFSET
 	hlt
 	jmp $
 
-KERNEL_OFFSET equ 0x1000
+KERNEL_OFFSET equ 0x8000
 STACK equ 0x9000
 
 BOOT_DRV db 0
