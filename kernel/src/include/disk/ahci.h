@@ -76,3 +76,4 @@ void ahci_port_stop_cmd(AHCI_HBA_PORT* port);
 
 void ahci_port_start_cmd(AHCI_HBA_PORT* port);
 
+void ahci_port_rebase(AHCI_HBA* ahci_hba);

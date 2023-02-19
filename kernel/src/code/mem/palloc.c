@@ -61,7 +61,7 @@ void mem_palloc_init(uint64_t* kernelstart, uint64_t* kernelend){
                 tbl_entry_start[byte_offset] = tbl_entry_start[byte_offset] & (0xFF ^ (1 << bit_offset));
                 
             }
-            //return;
+            return;
         }
         tbl_entry_start = &tbl_entry_start[entry_size / 0x8000];
     }
