@@ -6,9 +6,9 @@ FILE_KERNEL_BIN := $(DIR_KERNEL)/kernel.bin
 
 FILE_OUT := OS.img
 
-.SILENT: $(FILE_OUT) $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
+.SILENT: $(FILE_OUT) $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN) clean
 
-all: clean $(FILE_OUT)
+all: reset $(FILE_OUT)
 
 #CREATE FINAL IMAGE
 $(FILE_OUT): $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
@@ -16,7 +16,7 @@ $(FILE_OUT): $(FILE_BOOT_BIN) $(FILE_KERNEL_BIN)
 	dd if=tmp.img of=$@ bs=512 count=2880
 	rm tmp.img
 	echo ""
-	ls -lha OS.img
+	ls -lha $(FILE_OUT)
 	ls -lha $(FILE_BOOT_BIN)
 	ls -lha $(FILE_KERNEL_BIN)
 
@@ -30,11 +30,18 @@ $(FILE_KERNEL_BIN):
 clean:
 	rm -f log.txt
 	rm -f OS.img
-	rm -f $(shell find . -type f \( -name "*.o" -or -name "*.bin" -or -name "*.elf" \) )
+	cd $(DIR_KERNEL) && make clean
+	cd $(DIR_BOOT) && make clean
+	clear
+
+reset:
+	rm -f OS.img
+	rm -f $(FILE_KERNEL_BIN)
+	rm -f $(FILE_BOOT_BIN)
 	clear
 
 run: $(FILE_OUT)
-	rm -f ./log.txt
+	rm -f log.txt
 	clear
 	qemu-system-x86_64 \
     -drive id=disk,file=OS.img,if=none,index=0,media=disk,format=raw \
@@ -43,4 +50,19 @@ run: $(FILE_OUT)
     -cpu max \
     -D log.txt \
     -d int \
-    -m 4G
+    -m 4G \
+	-enable-kvm
+
+debug: $(FILE_OUT)
+	rm -f log.txt
+	clear
+	qemu-system-x86_64 \
+    -drive id=disk,file=OS.img,if=none,index=0,media=disk,format=raw \
+    -device ahci,id=ahci \
+    -device ide-hd,drive=disk,bus=ahci.0 \
+    -cpu max \
+    -D log.txt \
+    -d int \
+    -m 4G \
+	-enable-kvm \
+	-gdb tcp::1234

@@ -22,7 +22,7 @@ FILES_O_C_ISR := $(patsubst $(DIR_CODE)/%.c,$(DIR_BUILD)/%.o,$(FILES_C_ISR))
 FILES_O_S     := $(patsubst $(DIR_CODE)/%.s,$(DIR_BUILD)/%.o,$(FILES_S))
 FILES_O       := $(FILES_O_C) $(FILES_O_C_ISR) $(FILES_O_S)
 
-.SILENT: $(FILE_OUT)
+.SILENT: $(FILE_OUT) clean
 
 #LINK KERNEL
 $(FILE_OUT): $(FILES_O)
@@ -38,3 +38,9 @@ $(FILES_O_C): $(DIR_BUILD)/%.o: $(DIR_CODE)/%.c
 #COMPILE ASM
 $(FILES_O_S): $(DIR_BUILD)/%.o: $(DIR_CODE)/%.s
 	$(NASM) $^ $(NASM_FLAGS) -o $@ 
+
+#CLEAN ALL BUILD FILES
+clean:
+	rm -f $(FILES_O)
+	rm -f $(DIR_BUILD)/kernel.elf
+	rm -f $(FILE_OUT)
