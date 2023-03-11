@@ -41,9 +41,7 @@ void mem_palloc_init(uint64_t* kernelstart, uint64_t* kernelend){
     error |= page_trace_PML4(*kernelend, &paddr_end);
     //unexpected error
     if(error != 0){
-        char errormsg[] = "/nCANT GET PADDR OF KERNEL! ERROR: /e";
-        screenPrintChars(errormsg);
-        screenPrintX16(error);screenNl();
+        screenPrint("/nCANT GET PADDR OF KERNEL! ERROR: /xW/n/e",error);
         while(1);
     }
     //find addr of kernel in palloc table an palloc it

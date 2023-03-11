@@ -18,15 +18,9 @@ void screenPrintChar(char c);
 
 void screenPrintChars(char *c);
 
-void screenPrintInt(int inp);
+void screenPrintX(uint64_t inp, uint8_t bits);
 
-void screenPrintX8(uint8_t inp);
-
-void screenPrintX16(uint16_t inp);
-
-void screenPrintX32(uint32_t inp);
-
-void screenPrintX64(uint64_t inp);
+void screenPrintB(uint64_t inp, uint8_t bits);
 
 void screenClear();
 
@@ -40,5 +34,9 @@ void screenClear();
 //  /xW ->  print hex word  (16-bit)
 //  /xD ->  print hex dword (32-bit)
 //  /xQ ->  print hex qword (64-bit)
+//  /bB ->  print bin byte  (8-bit)
+//  /bW ->  print bin word  (16-bit)
+//  /bD ->  print bin dword (32-bit)
+//  /bQ ->  print bin qword (64-bit)
 //  /c  ->  print char[] (ends with/e)
 void screenPrint(const char* fmt,...);

@@ -68,55 +68,25 @@ void screenPrintChars(char *c){
     }
 }
 
-char hex_dig []   = "0123456789ABCDEF"; 
+char hex_digits[]   = "0123456789ABCDEF"; 
 char hex_prefix[] = "0x/e";
 
-void screenPrintInt(int inp){
+void screenPrintX(uint64_t inp, uint8_t bits){
     screenPrintChars(hex_prefix);
-    for(int i=3; i>=0; i--){
-        int x = (inp & (0xFF << (i*8))) >> (i*8);
-        screenPrintChar(hex_dig[(x & 0xF0) >> 4]);
-        screenPrintChar(hex_dig[x & 0x0F]);
+    for(int i=(bits-4); i>=0; i=i-4){
+        uint64_t offset = (inp >> i) & 0xF;
+        screenPrintChar(hex_digits[offset]);
     }
 }
 
-void screenPrintX8(uint8_t inp){
-    screenPrintChars(hex_prefix);
-    screenPrintChar(hex_dig[(inp & 0xF0) >> 4]);
-    screenPrintChar(hex_dig[inp & 0x0F]);
-}
+char bin_digits[] = "01";
+char bin_prefix[] = "0b/e";
 
-void screenPrintX16(uint16_t inp){
-    screenPrintChars(hex_prefix);
-    for(int i=1; i>=0; i--){
-        int x = (inp & (0xFF << (i*8))) >> (i*8);
-        screenPrintChar(hex_dig[(x & 0xF0) >> 4]);
-        screenPrintChar(hex_dig[x & 0x0F]);
-    }
-}
-
-void screenPrintX32(uint32_t inp){
-    screenPrintChars(hex_prefix);
-    for(int i=3; i>=0; i--){
-        int x = (inp & (0xFF << (i*8))) >> (i*8);
-        screenPrintChar(hex_dig[(x & 0xF0) >> 4]);
-        screenPrintChar(hex_dig[x & 0x0F]);
-    }
-}
-
-void screenPrintX64(uint64_t inp){
-    screenPrintChars(hex_prefix);
-    uint32_t inp1 = (uint32_t) (inp >> 32);
-    uint32_t inp2 = (uint32_t) inp; 
-    for(int i=3; i>=0; i--){
-        int x = (inp1 & (0xFF << (i*8))) >> (i*8);
-        screenPrintChar(hex_dig[(x & 0xF0) >> 4]);
-        screenPrintChar(hex_dig[x & 0x0F]);
-    }
-    for(int i=3; i>=0; i--){
-        int x = (inp2 & (0xFF << (i*8))) >> (i*8);
-        screenPrintChar(hex_dig[(x & 0xF0) >> 4]);
-        screenPrintChar(hex_dig[x & 0x0F]);
+void screenPrintB(uint64_t inp, uint8_t bits){
+    screenPrintChars(bin_prefix);
+    for(int i=(bits-1); i>=0; i--){
+        uint64_t offset = (inp >> i) & 1;
+        screenPrintChar(bin_digits[offset]);
     }
 }
 
@@ -148,14 +118,28 @@ void screenPrint(const char* fmt, ...){
                 fmt++;
                 switch(*fmt){
                 case 'B':
-                    screenPrintX8((uint8_t) va_arg(args, uint32_t)); break;
+                    screenPrintX((uint8_t)  va_arg(args, uint32_t), 8);  break;
                 case 'W':
-                    screenPrintX16((uint16_t) va_arg(args, uint32_t)); break;
+                    screenPrintX((uint16_t) va_arg(args, uint32_t), 16); break;
                 case 'D':
-                    screenPrintX32(va_arg(args, uint32_t)); break;
+                    screenPrintX((uint32_t) va_arg(args, uint32_t), 32); break;
                 case 'Q': 
-                    screenPrintX64(va_arg(args, uint64_t)); break;
+                    screenPrintX((uint64_t) va_arg(args, uint64_t), 64); break;
                 }
+            }else if(*fmt == 'b'){
+                fmt++;
+
+                switch(*fmt){
+                case 'B':
+                    screenPrintB((uint8_t)  va_arg(args, uint32_t), 8);  break;
+                case 'W':
+                    screenPrintB((uint16_t) va_arg(args, uint32_t), 16); break;
+                case 'D':
+                    screenPrintB((uint32_t) va_arg(args, uint32_t), 32); break;
+                case 'Q':
+                    screenPrintB((uint64_t) va_arg(args, uint64_t), 64); break;
+                }
+                
             }else if(*fmt == 'c'){
                 screenPrintChars(va_arg(args, char*));
             }

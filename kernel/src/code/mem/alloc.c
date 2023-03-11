@@ -20,15 +20,11 @@ void mem_init(uint64_t* kernelend, uint64_t memoryend, uint8_t maxlin){
     maxlinaddr = (1 << maxlin) - 1;
 }
 
-char next[]  = "NEXT : /e";
-char prev[]  = "PREV : /e";
-char vaddr[] = "START: /e";
-
 void mem_print_tail(struct MEM_ALLOC_TAIL* tail){
-    screenNl(); screenNl();
-    screenPrintChars(next);  screenPrintX64((uint64_t) tail->next); screenNl();
-    screenPrintChars(prev);  screenPrintX64((uint64_t) tail->prev); screenNl();
-    screenPrintChars(vaddr); screenPrintX64((uint64_t) tail->vaddr); screenNl();
+    screenPrint("/n/n/e");
+    screenPrint("NEXT : /xQ/n/e", (uint64_t) tail->next);
+    screenPrint("PREV : /xQ/n/e", (uint64_t) tail->prev);
+    screenPrint("START: /xQ/n/e", (uint64_t) tail->vaddr);
 }
 
 uint64_t paddr = 0;
