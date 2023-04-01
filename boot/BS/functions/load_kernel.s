@@ -10,7 +10,7 @@ load_kernel:
 	call load_sectors
 	
 	mov ebx, KERNEL_OFFSET + (512 * 50)
-	mov al, 10
+	mov al, 12
 	mov dl, [BOOT_DRV]
 	mov ch, 0
 	mov cl, 2 + 50
