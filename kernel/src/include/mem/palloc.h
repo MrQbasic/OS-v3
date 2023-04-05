@@ -32,3 +32,5 @@ int mem_palloc(uint64_t* addr, uint64_t number_of_pages);
 //  0 -> OK
 //  1 -> NO MATCHES
 int mem_pfree(uint64_t addr, uint64_t number_of_pages);
+
+void print_memorymap();
