@@ -7,10 +7,14 @@ int cur_Y = 0;
 void screenUp(){
     char *x = (char *) SCREEN_START;
     char *y = (char *) SCREEN_START + (SCREEN_WIDTH * 2);
-    for(int i=0; i<SCREEN_HIGHT * (SCREEN_WIDTH * 2); i++){
+    for(int i=0; i < (SCREEN_HIGHT) * (SCREEN_WIDTH * 2); i++){
         *x = *y;
         x++;
         y++;
+    }
+    for(int i=0; i < (SCREEN_HIGHT) * (SCREEN_WIDTH * 2); i++){
+        *x = 0;
+        x++;
     }
 }
 
