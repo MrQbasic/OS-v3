@@ -7,18 +7,25 @@ uint16_t* memorymap_count = (uint16_t*) MEMORYMAP_COUNT_PTR;
 
 uint64_t memorymap_max_ram = 0;
 
+char type_map[5][10] = {
+    "NORMAL  /e",
+    "RESERVED/e",
+    "ACPI REC/e",
+    "ACPI NVS/e",
+    "BAD     /e"};
 
 void print_memorymap(){
-    screenPrint("--MEMORY MAP--/n/n/e");
-    screenPrint(" BASE               SIZE               TYPE/n/e");
-    screenPrint("+------------------+------------------+----------+/n/e");
+    screenPrint("+------------------+----MEMORY-MAP----+------------------+--------+/n/e");
+    screenPrint("|      START       |       END        |       SIZE       |  TYPE  |/n/e");
+    screenPrint("+------------------+------------------+------------------+--------+/n/e");
     for(int i=0; i<*memorymap_count; i++){
-        uint64_t base = memorymap[i].base;
-        uint64_t size = memorymap[i].length;
-        uint32_t type = memorymap[i].type;
-        screenPrint("|/xQ|/xQ|/xD|/n/e",base,size,type);
+        uint64_t start = memorymap[i].base;
+        uint64_t size  = memorymap[i].length;
+        uint64_t end   = start + size - 1;
+        uint32_t type  = memorymap[i].type;
+        screenPrint("|/xQ|/xQ|/xQ|/c|/n/e",start,end,size,type_map[type-1]);
     }
-    screenPrint("+------------------+------------------+----------+/n/e");
+    screenPrint("+------------------+------------------+------------------+--------+/n/e");
 }
 
 //defined in in bytes. 1 bit = 1 page  |  0=allocated  1=free
