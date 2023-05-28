@@ -20,5 +20,7 @@ struct IDTR_64 {
 
 void idt_set(uint64_t offset, uint16_t segSel, uint8_t idte, uint8_t flags);
 
+void print_idte(int int_index);
+
 void idt_init();
 
