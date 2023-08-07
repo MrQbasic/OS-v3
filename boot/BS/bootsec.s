@@ -6,20 +6,21 @@ start:
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
-	mov sp, STACK	    ; set stack address
-	mov sp, bp
+	mov sp, STACK		; set stack address
+	mov bp, sp
+
 	jmp 0:main	        ; far jump for cs
 main:
 	sti			        ; enable interrupts
 	mov [BOOT_DRV], dl	; remember the boot device
 	call load_kernel	; actually load the system
-	
+
 	call KERNEL_OFFSET
 	hlt
 	jmp $
 
 KERNEL_OFFSET equ 0x8000
-STACK equ 0x9000
+STACK equ 0x8000
 
 BOOT_DRV db 0
 
