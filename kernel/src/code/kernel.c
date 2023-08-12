@@ -9,6 +9,7 @@ void _start(){
 #include "mem/mem.h"
 #include "pci/pci.h"
 #include "disk/disk.h"
+#include "tools/checksum.h"
 
 uint8_t MAXPHYADDR, MAXLINADDR;
 
@@ -58,13 +59,12 @@ void main(){
     idt_set((uint64_t)        vmmISR, 0x08, 0x1D, EXC_IDT_FLAG);
     idt_set((uint64_t)        secISR, 0x08, 0x1E, EXC_IDT_FLAG);
 
-    //setup system counter
     screenPrint("Setup PIT IRQ... /e");
     syscounter_init();
     screenPrint("OK/n/e");
 
-    //enable irqs    
-    //__asm__("sti");
+    //enable irqs  
+    asm volatile("sti");
 
     //print CPU info
     char *vendorstr = cpuid_getVendor(); 
@@ -106,6 +106,9 @@ void main(){
     //print new end + start of kernel
     screenPrint("Kernel start: /xQ/n/e",startofkernel);
     screenPrint("Kernel end  : /xQ/n/e",endofkernel);
+    
+
+    print_memorymap();
     
     //print pci info
     pciCheckBus();
