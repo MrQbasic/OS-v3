@@ -122,8 +122,6 @@ void main(){
     }
     disk_init();
 
-    
-    
     //end of kernel
     screenPrint("DONE!/e");
     while(1);
