@@ -1,7 +1,7 @@
 #include "cpu/idt.h"
 #include "screen.h"
 
-struct IDT64 IDT[256];
+struct IDT64 IDT[400];
 
 struct IDTR_64 IDTR;
 
@@ -27,7 +27,7 @@ void  idt_init(){
    //get ptr to external default isr
    extern void idt_isr_default();
    //setupt idt
-   for(int i=0; i<100; i++){
+   for(int i=0; i<256; i++){
       idt_set((uint64_t) idt_isr_default, IDT_DEFAULT_SEGSEL, i, IDT_DEFAULT_FLAG);
    }
    //setupt idtr
