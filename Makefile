@@ -51,6 +51,7 @@ run: $(FILE_OUT)
     -D log.txt \
     -d int \
     -m 4G \
+	-trace ahci* \
 	-enable-kvm
 
 debug: $(FILE_OUT)
@@ -64,5 +65,6 @@ debug: $(FILE_OUT)
     -D log.txt \
     -d int \
     -m 4G \
+	-trace ahci* \
 	-enable-kvm \
 	-gdb tcp::1234
