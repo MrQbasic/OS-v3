@@ -4,18 +4,28 @@
 int cur_X = 0;
 int cur_Y = 0;
 
+void screenCursorMove(int x, int y){
+    cur_X += x;
+    cur_Y += y;
+    if(cur_X < 0) cur_X = 0;
+    if(cur_Y < 0) cur_Y = 0;
+
+}
+
 void screenUp(){
     char *x = (char *) SCREEN_START;
     char *y = (char *) SCREEN_START + (SCREEN_WIDTH * 2);
+    __asm__("cli");
     for(int i=0; i < (SCREEN_HIGHT) * (SCREEN_WIDTH * 2); i++){
         *x = *y;
         x++;
         y++;
     }
-    for(int i=0; i < (SCREEN_HIGHT) * (SCREEN_WIDTH * 2); i++){
+    for(int i=0; i < (SCREEN_WIDTH * 2); i++){
         *x = 0;
         x++;
     }
+    __asm__("sti");
 }
 
 void screenNl(){
@@ -72,7 +82,7 @@ void screenPrintChars(char *c){
     }
 }
 
-char hex_digits[]   = "0123456789ABCDEF"; 
+char hex_digits[] = "0123456789ABCDEF"; 
 char hex_prefix[] = "0x/e";
 
 void screenPrintX(uint64_t inp, uint8_t bits){
@@ -104,7 +114,10 @@ void screenClear(){
     cur_Y = 0;
 }
 
+uint8_t printStatus = 0;
+
 void screenPrint(const char* fmt, ...){
+    if(printStatus == 1) return;
     va_list args;
     va_start(args,fmt);
     while(1){
@@ -153,3 +166,20 @@ void screenPrint(const char* fmt, ...){
         fmt++;
     }
 }
+
+void screenSetPrintStatus(uint8_t status){
+    printStatus = status;
+}
+
+void screenMemoryDump(uint64_t start, uint64_t size){
+    size = size & 0xFFFF;
+    for(int i=0; i < size; i += SCREEN_MEMORY_DUMP_BYTES_PER_ROW){
+        screenPrint("/xW: /e",i);
+        for(int j=0; j<SCREEN_MEMORY_DUMP_BYTES_PER_ROW; j++){
+            uint8_t* b = (uint8_t*) start + i + j;
+            screenPrint("/xB /e ", *b);
+        }
+        screenNl();
+    }
+}
+

@@ -2,7 +2,7 @@
 
 #define SCREEN_START 0x000B8000
 #define SCREEN_WIDTH 80
-#define SCREEN_HIGHT 20
+#define SCREEN_HIGHT 19
 #define SCREEN_DEFAULT_COLOR 0x0F
 
 
@@ -24,7 +24,7 @@ void screenPrintB(uint64_t inp, uint8_t bits);
 
 void screenClear();
 
-
+void screenCursorMove(int x, int y);
 
 //commands:
 //  /e  ->  end of string
@@ -40,3 +40,10 @@ void screenClear();
 //  /bQ ->  print bin qword (64-bit)
 //  /c  ->  print char[] (ends with/e)
 void screenPrint(const char* fmt,...);
+
+#define SCREEN_MEMORY_DUMP_BYTES_PER_ROW 8
+void screenMemoryDump(uint64_t start, uint64_t size);
+
+// 0 -> Normal
+// 1 -> printDisables (only function screenPrint)
+void screenSetPrintStatus(uint8_t status);
