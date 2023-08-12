@@ -3,11 +3,15 @@
 #include "mem/mem.h"
 #include "screen.h"
 
+#include "tools/checksum.h"
+
 uint64_t* ahci_abar_phy;
 AHCI_HBA** ahci_abar;
 AHCI_LIN_ADDRESS_LIST_ENTRY* lin_address_list = 0;
 
 int ahci_init_disk(uint16_t disk_count, uint16_t* disk_addr){
+    screenPrint("---INIT AHCI DISKS---/n/e");
+    screenPrint("NUMBER OF AHCI DEV: /xW/n/e",disk_count);
     //setup abar ports
     ahci_abar_phy = (uint64_t*) mem_alloc(sizeof(uint64_t) * disk_count, 0);
     ahci_abar = (AHCI_HBA**) mem_alloc(sizeof(AHCI_HBA*) * disk_count, 0);
@@ -16,8 +20,9 @@ int ahci_init_disk(uint16_t disk_count, uint16_t* disk_addr){
         uint8_t slot = (uint8_t) (disk_addr[i] >> 8);
         ahci_abar_phy[i]  = 0x000000000000FFFF & (pciConfigReadWord(bus, slot, 0, 0x24) <<  0);
         ahci_abar_phy[i] |= 0x00000000FFFF0000 & (pciConfigReadWord(bus, slot, 0, 0x26) << 16);
-        ahci_abar[i] = (AHCI_HBA*) mem_alloc(0x1000, 0x1000);
+        screenPrint("AHCI DEV @ BUS:/xB SLOT:/xB/n/e",bus,slot);
         //remap memory so match abar
+        ahci_abar[i] = (AHCI_HBA*) mem_alloc(0x1000, 0x1000);
         int error = 0;
         uint64_t paddr;
         error |= page_trace_PML4((uint64_t) ahci_abar[i], &paddr);
@@ -28,6 +33,7 @@ int ahci_init_disk(uint16_t disk_count, uint16_t* disk_addr){
             while(1);
         }
         page_map_PML4((uint64_t) ahci_abar[i], ahci_abar_phy[i], 0b00010001, 0x00);
+        screenPrint(" > PHY:/xQ  LIN:/xQ/n/e",ahci_abar_phy[i],ahci_abar[i]);
         //print implemented ports / devices
         uint32_t impl = ahci_abar[i]->ports_implemented;
         int port_index = 0;
@@ -38,19 +44,32 @@ int ahci_init_disk(uint16_t disk_count, uint16_t* disk_addr){
             if(type == AHCI_DEV_SATAPI) screenPrint("SATAPI /e");
             if(type == AHCI_DEV_SEMB)   screenPrint("SEMB /e");
             if(type != AHCI_DEV_NULL){
-                screenPrint("DEV @ PORT: /xB LIN: /xQ PHY: /xQ/n/e",(uint8_t)port_index, ahci_abar[i],ahci_abar_phy[i]);
+                screenPrint("DEV @ PORT: /xB LIN: /xQ PHY: /xQ/n/e",
+                    (uint8_t)port_index, 
+                    ahci_abar[i],
+                    ahci_abar_phy[i]);
             }
             port_index++;
             impl = impl >> 1;
         }
         //rebase ports
         ahci_port_rebase(ahci_abar[i]);
-        ahci_port_read(ahci_abar[i]->ports,0,1,0);
+
+        uintptr_t buf = mem_alloc(0x2000, 0x10000);
+        uintptr_t buf_phy;
+        page_trace_PML4(buf, &buf_phy);
+
+        uint64_t checksum = 0;
+        screenPrint("CHECKSUM: /xD/n/e",checksumMemory(buf, 0x2000));
+        ahci_port_read(ahci_abar[i]->ports,1,1,buf_phy);
+        screenPrint("CHECKSUM: /xD/n/e",checksumMemory(buf, 0x2000));
     }
     //setup 
-
+    screenPrint("---DONE WITH AHCI---/n/e");
     return 0;
 }
+
+
 
 int ahci_port_check_type(AHCI_HBA_PORT* port){
     uint32_t status = port->sata_status;
@@ -81,6 +100,9 @@ void ahci_port_start_cmd(AHCI_HBA_PORT* port){
     while(port->cmd & AHCI_HBA_PORT_CMD_CR);
     port->cmd |= AHCI_HBA_PORT_CMD_FRE;
     port->cmd |= AHCI_HBA_PORT_CMD_ST;
+    for (int delay = 0; delay < 1000000; delay++) {
+        asm volatile("nop");
+    }
 }
 
 void ahci_append_to_lin_address_list(AHCI_LIN_ADDRESS_LIST_ENTRY* entry){
@@ -106,9 +128,13 @@ void ahci_port_rebase(AHCI_HBA* ahci_hba){
         impl = impl >> 1;
         int type = ahci_port_check_type(&(ahci_hba->ports[port_index]));
         if(type != AHCI_DEV_SATA) continue;
+        screenPrint("+--REBASE PORT:/xB/n/e---",(uint8_t)(port_index));
         //get port ready
         AHCI_HBA_PORT* port = &(ahci_hba->ports[port_index]);
+        screenPrint("| ADDR: /xQ/n/e",(uint64_t)port);
+        screenPrint("| STOP PORT/e");
         ahci_port_stop_cmd(port);
+        screenPrint(" OK/n/e");
         //setup address list entry
         AHCI_LIN_ADDRESS_LIST_ENTRY* addr_list = 
                     (AHCI_LIN_ADDRESS_LIST_ENTRY*) mem_alloc(sizeof(AHCI_LIN_ADDRESS_LIST_ENTRY),0);
@@ -116,30 +142,28 @@ void ahci_port_rebase(AHCI_HBA* ahci_hba){
         addr_list->id = (uint64_t) port;
         ahci_append_to_lin_address_list(addr_list);
         //remap command list
-        uint64_t cmd_list_virt = mem_alloc(0x400,0x400);
-        uint64_t cmd_list_phy;
+        uint64_t cmd_list_phy, cmd_list_virt = mem_alloc(0x1000,0x1000);
         page_trace_PML4(cmd_list_virt, &cmd_list_phy);
-        cmd_list_phy += cmd_list_virt & 0x0FFF;
-        //point hardware to new space
-        port->clb  = (uint32_t)  cmd_list_phy;
-        port->clbu = (uint32_t) (cmd_list_phy >> 32);
-        //clear allocated memory
-        mem_write((void*) cmd_list_virt, 0,1024);
-        //add to phy address list entry
-        addr_list->cmd_list = cmd_list_virt; 
+        mem_pfree(cmd_list_phy, 1);
+        cmd_list_phy   = (uint64_t) port->clb;
+        cmd_list_phy  |= (uint64_t) port->clbu << 32;
+        cmd_list_virt |= cmd_list_phy & 0x0FFF;
+        page_map_PML4(cmd_list_virt, cmd_list_phy, 0x11, 0);
+        mem_write((void*) cmd_list_virt, 0,4096);
+        addr_list->cmd_list = cmd_list_virt;
+        screenPrint("| CMD LIST-> LIN: /xQ PHY: /xQ/n/e",cmd_list_virt, cmd_list_phy);
         //remap fis
-        uint64_t fis_virt = mem_alloc(0x100, 0x100);
-        uint64_t fis_phy;
+        uint64_t fis_phy, fis_virt = mem_alloc(0x1000, 0x1000);
         page_trace_PML4(fis_virt, &fis_phy);
-        fis_phy += cmd_list_virt & 0x0FFF;
-        //point hardware to new space
-        port->fb  = (uint32_t)  cmd_list_phy;
-        port->fbu = (uint32_t) (cmd_list_phy >> 32);
-        //clear allocated memory
-        mem_write((void*) fis_virt, 0, 256);
-        //add to phy address list entry
+        mem_pfree(cmd_list_phy, 1);
+        fis_phy   = (uint64_t) port->fb;
+        fis_phy  |= (uint64_t) port->fbu << 32;
+        fis_virt |= fis_phy & 0x0FFF;
+        page_map_PML4(fis_virt, fis_phy, 0x11, 0);
+        mem_write((void*) fis_virt, 0, 4096);
         addr_list->fis = fis_virt;
-        //remap command 
+        screenPrint("| FIS     -> LIN: /xQ PHY: /xQ/n/e",fis_virt, fis_phy);
+        //remap command table
         AHCI_HBA_CMD_HEADER *cmdheader = (AHCI_HBA_CMD_HEADER*) cmd_list_virt;
         for(int i=0; i<32; i++){
             cmdheader[i].phy_region_descriptor_table_length = 8;
@@ -159,7 +183,10 @@ void ahci_port_rebase(AHCI_HBA* ahci_hba){
             addr_list->cmd_tbl[i] = virt_addr;
         }
         //restart port
+        screenPrint("| START PORT/e");
         ahci_port_start_cmd(port);
+        screenPrint(" OK/n/e");
+        screenPrint("+---------->/n/e");
     }
 }
 
@@ -171,9 +198,7 @@ void ahci_port_rebase(AHCI_HBA* ahci_hba){
 int find_cmdslot(AHCI_HBA_PORT *port){
 	// If not set in SACT and CI, the slot is free
 	uint32_t slots = (port->sata_active | port->ci);
-    screenPrint("/xD/n/e",slots);
-	for (int i=0; i<1; i++){
-        
+	for (int i=0; i<32; i++){
 		if ((slots&1) == 0) return i;
 		slots >>= 1;
 	}
@@ -186,7 +211,9 @@ int find_cmdslot(AHCI_HBA_PORT *port){
 
 //1 is bad
 int ahci_port_read(AHCI_HBA_PORT *port, uint64_t start, uint32_t count, uint64_t buf){
-    screenPrint("/0---AHCI-READ---/n/e");
+    //check inputs
+
+    screenPrint("---AHCI-READ---/n/e");
     //search address list
     if(lin_address_list == 0) return 1;
     AHCI_LIN_ADDRESS_LIST_ENTRY* addr_list = lin_address_list;
@@ -196,28 +223,28 @@ int ahci_port_read(AHCI_HBA_PORT *port, uint64_t start, uint32_t count, uint64_t
     }
     screenPrint("PORT ADDR    : /xQ/n/e",(uint64_t) port);
     screenPrint("PORT ADDR_TBL: /xQ/n/e",(uint64_t) addr_list);
+
     //find cmd slot
-    port->is = (uint32_t) -1;		// Clear pending interrupt bits
-	int spin = 0; // Spin lock timeout counter
+    port->is = (uint32_t) -1;
 	int slot = find_cmdslot(port);
 	if (slot == -1) return 1;
-    
-	AHCI_HBA_CMD_HEADER *cmdheader = (AHCI_HBA_CMD_HEADER*) addr_list->cmd_list;
-
-	cmdheader += slot;
+    screenPrint("CMD_SLOT     : /xD/n/e",slot);
+	
+    //setup cmdheader
+    AHCI_HBA_CMD_HEADER *cmdheader = (AHCI_HBA_CMD_HEADER*) addr_list->cmd_list;
+	cmdheader+= slot;
+    screenPrint("CMD_HEADER   : /xQ/n/e",(uint64_t) cmdheader);
 	cmdheader->cmd_FIS_length = sizeof(FIS_REG_H2D)/sizeof(uint32_t);	// Command FIS size
 	cmdheader->w = 0;		// Read from device
 	cmdheader->phy_region_descriptor_table_length = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
- 
-	AHCI_HBA_CMD_TABLE *cmdtbl;
-    cmdtbl = (AHCI_HBA_CMD_TABLE*)((uint64_t) cmdheader->cmd_tbl_base_lower);
-    cmdtbl = (AHCI_HBA_CMD_TABLE*)((uint64_t) cmdheader->cmd_tbl_base_upper << 32);
-    
+	
+    //setup cmdtbl
+    AHCI_HBA_CMD_TABLE *cmdtbl = (AHCI_HBA_CMD_TABLE*) addr_list->cmd_tbl;
+    screenPrint("CMD_TABLE    : /xQ/n/e",(uint64_t) cmdtbl);
+
     uint64_t size = sizeof(AHCI_HBA_CMD_TABLE) + (cmdheader->phy_region_descriptor_table_length-1)*sizeof(HBA_PRDT_ENTRY);
     uint8_t *tmp = (uint8_t*) cmdtbl;
-    for(int i=0; i<size; i++){
-       *tmp = 0;
-    }
+    mem_write((void*) cmdtbl, 0, size);
 
 	// 8K bytes (16 sectors) per PRDT
     int i=0;
@@ -237,8 +264,12 @@ int ahci_port_read(AHCI_HBA_PORT *port, uint64_t start, uint32_t count, uint64_t
 	cmdtbl->prdt_entry[i].interrupt = 1;
  
 	// Setup command
-	FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cmd_FIS);
- 
+    FIS_REG_H2D *cmdfis = (FIS_REG_H2D*) addr_list->fis;
+    
+    mem_write((void*)cmdfis, 0, sizeof(FIS_REG_H2D));
+
+    screenPrint("CMD_FIS      : /xQ/n/e",cmdfis);
+
 	cmdfis->fis_type = FIS_TYPE_REG_H2D;
 	cmdfis->c = 1;	// Command
 	cmdfis->command = ATA_CMD_READ_DMA_EX;
@@ -255,26 +286,33 @@ int ahci_port_read(AHCI_HBA_PORT *port, uint64_t start, uint32_t count, uint64_t
 	cmdfis->countl = count & 0xFF;
 	cmdfis->counth = (count >> 8) & 0xFF;
 
+
+	int spin = 0;
 	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000){
 		spin++;
 	}
+    screenPrint("SPIN CNT: /xD/n/e",spin);
 	if (spin == 1000000){
 		screenPrint("Port is hung/n/e");
 		return 1;
 	}
     
 	port->ci = 1<<slot;
-	while (1){
-		if ((port->ci & (1<<slot)) == 0) break;
-		if (port->is & HBA_PxIS_TFES){
-			screenPrint("Read disk error/n/e");
-			return 1;
-		}
-	}
-	if (port->is & HBA_PxIS_TFES){
-		screenPrint("Read disk error/n/e");
-		return 1;
-	}
-    screenPrint("/nREAD GOOD!/e");
+
+    spin = 0;
+    while (1) {
+        if ((port->ci & (1 << slot)) == 0) break;
+        if (port->is & HBA_PxIS_TFES) {
+            screenPrint("Read disk error/n/e");
+            return 1;
+        }
+        spin++;
+    }
+    if(spin != 0){
+        while(1);
+    }
+    screenPrint("WAIT ON READY CNT: /xD/n/e",spin);
+
+    screenPrint("/nREAD GOOD!/n/e");
 	return 0;
 }
