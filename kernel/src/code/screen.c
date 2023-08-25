@@ -9,7 +9,22 @@ void screenCursorMove(int x, int y){
     cur_Y += y;
     if(cur_X < 0) cur_X = 0;
     if(cur_Y < 0) cur_Y = 0;
+    if(cur_X > SCREEN_WIDTH) cur_X = SCREEN_WIDTH;
+    if(cur_Y > SCREEN_HIGHT) cur_Y = SCREEN_HIGHT;
+}
 
+void screenCursorSet(int x, int y){
+    cur_X = x;
+    cur_Y = y;
+    if(cur_X < 0) cur_X = 0;
+    if(cur_Y < 0) cur_Y = 0;
+    if(cur_X > SCREEN_WIDTH) cur_X = SCREEN_WIDTH;
+    if(cur_Y > SCREEN_HIGHT) cur_Y = SCREEN_HIGHT;
+}
+
+void screenCursorGet(int* x, int* y){
+    *x = cur_X;
+    *y = cur_Y;
 }
 
 void screenUp(){

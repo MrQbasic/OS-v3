@@ -26,6 +26,10 @@ void screenClear();
 
 void screenCursorMove(int x, int y);
 
+void screenCursorSet(int x, int y);
+
+void screenCursorGet(int* x, int*y);
+
 //commands:
 //  /e  ->  end of string
 //  /n  ->  new line
