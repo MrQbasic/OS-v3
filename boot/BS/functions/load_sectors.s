@@ -42,6 +42,7 @@ load_sectors:
 	pop ax
 	ret
 
+
 read_error_1:
 	mov esi, -1  ;SIGNAL ERROR
 read_error_2:
