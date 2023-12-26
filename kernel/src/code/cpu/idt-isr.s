@@ -1,8 +1,6 @@
 extern pic_eoi
 extern screenPrintChars
 
-SECTION .data
-
 SECTION .text
     GLOBAL idt_isr_default
 
