@@ -22,6 +22,18 @@ void main(){
     screenClear();
     screenPrint("---Kernel---/n/e");
 
+    //delay for debugger to catch qemu
+    int oldX, oldY;
+    screenCursorGet(&oldX, &oldY);
+    int i = 0;
+    for(int i=0xFFFF;i!=0;i--){
+        screenCursorSet(oldX, oldY);
+        screenPrintX(i,16);
+    }
+    screenCursorSet(oldX, oldY);
+    screenPrint("      /e");
+    screenCursorSet(oldX, oldY);
+
     //setup pic (remap IRQs)
     uint8_t pic_0_base = 0x20;
     uint8_t pic_1_base = 0x28;
@@ -107,10 +119,10 @@ void main(){
     screenPrint("Kernel start: /xQ/n/e",startofkernel);
     screenPrint("Kernel end  : /xQ/n/e",endofkernel);
     
+    //status about memmap
+    //print_memorymap();
 
-    print_memorymap();
-    
-    //print pci info
+    //init PCI system
     pciCheckBus();
     pciPrintInfo();
 
