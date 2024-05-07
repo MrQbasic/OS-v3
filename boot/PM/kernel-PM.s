@@ -186,6 +186,10 @@ align 0x1000
 MEMORYMAP_CNT: dw 0
 MEMORYMAP_START: db 0
 align 0x1000
+spacer: db 0 ; here to expand space for mem map
+align 0x1000
+spacer2: db 0 ; here to expand space for mem map
+align 0x1000
 ;KERNEL enter
 [bits 64]
 kernel64:
