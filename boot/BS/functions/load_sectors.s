@@ -8,29 +8,41 @@
 [bits 16]
 load_sectors:
 	push ax		  ;save regs
-	push bx
+	push ebx
 	push cx
 	push dx
 	push esi
 
-	mov si, ax
-
-	and ebx, 0x000F_FFFF  ;limit addr space adressable in 16 bit mode	
-	ror ebx, 12
-	shl bx, 8
+	;save sectors to read cnt for later checkup
+	mov si, ax	
+	
+	;do address calculation ebx->es:bx
+	ror ebx, 4
 	mov es, bx
-	xor bx, bx
-	rol ebx, 12
+	shr ebx, 28
 
+
+	;setup cnt for reset loop
+	push esi
+	mov esi, 0xFF
 .reset:
-	mov ah, 0	  ; reset disk
+	;check for reset cnt limit
+	dec esi
+	jz read_error_3
+	;reset disk
+	mov ah, 0
 	int 0x13
-	jc .reset	  ; reset again if error
+	;if it doesn't work try again
+	jc .reset
+	pop esi
 
-	mov ah, 0x02  ; BIOS read
+	;read from disk
+	mov ah, 0x02
 	int 0x13
-	jc read_error_2 ; carry flag is set on error
+	;error out if it didn't work
+	jc read_error_2
 
+	;check for sectors read
 	mov cx, si
 	cmp al, cl
 	jne read_error_1
@@ -38,15 +50,25 @@ load_sectors:
 	pop esi
 	pop dx
 	pop cx
-	pop bx
+	pop ebx
 	pop ax
 	ret
+
+read_error_3:
+	mov cx, 1
+	mov ah, 0x0A
+	mov al, "L"
+	int 0x10
+	jmp $
 
 
 read_error_1:
 	mov esi, -1  ;SIGNAL ERROR
 read_error_2:
+	pusha
+	mov cx, 1
 	mov ah, 0x0A
 	mov al, "E"
 	int 0x10
+	popa
 	jmp $
